@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <list>
 
 using namespace std;
 
@@ -38,4 +39,35 @@ private:
 	char* filename;
 	ifstream seqstream;
 	int seq_length;
+
+	/**
+	 * Fills sufix tree with input suffix
+	 */
+	void filltree(tree<TreeNode> tr, char* suffix);
 };
+
+
+/**
+ * Node in the suffix tree
+ */
+class TreeNode {
+public:
+	/**
+	 * Character to match
+	 */
+	char c;
+	/**
+	 * List of positions in sequence matching this node
+	 */
+	list<long> positions;
+	/**
+	 * Creates a node from a char
+	 */
+	TreeNode(char nc);
+
+private:
+
+
+};
+
+

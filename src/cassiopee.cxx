@@ -9,6 +9,10 @@
 
 using namespace std;
 
+TreeNode::TreeNode(char nc): c(nc), positions() {
+
+}
+
 CassieIndexer::~CassieIndexer() {
 	if(this->seqstream) {
 		this->seqstream.close();
@@ -32,10 +36,26 @@ CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path)
 }
 
 void CassieIndexer::index() {
+
+	tree<TreeNode> tr;
+	tree<TreeNode>::iterator top;
+	char* suffix;
+
+	top = tr.begin();
+
 	cout << "I will update this file:" << this->filename << endl;
 	for (int i=0; i<this->seq_length; i++) {
 		cout << "Index suffix " << i << endl;
+		suffix=NULL;
+		// Extract a suffix
+		this->seqstream.getline(suffix, this->seq_length-1-i);
+		this->filltree(top,suffix);
 	}
+
+	delete(top);
+	top = NULL;
+	delete(tr);
+	tr = NULL;
 }
 
 string CassieIndexer::getSuffix(int pos) {
