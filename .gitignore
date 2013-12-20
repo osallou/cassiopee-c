@@ -18,3 +18,5 @@ CMakeFiles
 cmake_install.cmake
 doc/*
 bin
+Makefile
+Cassiopee

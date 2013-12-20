@@ -1,0 +1,5 @@
+// the configured options and settings for Cassiopee
+#define Cassiopee_VERSION_MAJOR @Cassiopee_VERSION_MAJOR@
+#define Cassiopee_VERSION_MINOR @Cassiopee_VERSION_MINOR@
+
+#define use_openmp @USE_OPENMP@
