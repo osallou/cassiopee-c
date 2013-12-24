@@ -2,7 +2,41 @@
 #include <fstream>
 #include <list>
 
+#include "tree/tree.hh"
+
 using namespace std;
+
+/**
+ * Node in the suffix tree
+ */
+class TreeNode {
+public:
+	/**
+	 * Character to match
+	 */
+	char* c;
+	/**
+	 * List of positions in sequence matching this node
+	 */
+	list<long> positions;
+	/**
+	 * Creates a node from a char
+	 */
+	TreeNode(char* nc);
+	TreeNode();
+
+private:
+
+
+};
+
+std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
+  if(a.c != NULL) {
+	  return strm << "TreeNode()";
+  }
+  return strm << "TreeNode(" << a.c << ")";
+}
+
 
 /**
  * Cassiopee indexer
@@ -43,31 +77,10 @@ private:
 	/**
 	 * Fills sufix tree with input suffix
 	 */
-	void filltree(tree<TreeNode> tr, char* suffix);
+	void filltree(tree<TreeNode> tr, tree<TreeNode>::iterator top, char* suffix);
 };
 
 
-/**
- * Node in the suffix tree
- */
-class TreeNode {
-public:
-	/**
-	 * Character to match
-	 */
-	char c;
-	/**
-	 * List of positions in sequence matching this node
-	 */
-	list<long> positions;
-	/**
-	 * Creates a node from a char
-	 */
-	TreeNode(char nc);
 
-private:
-
-
-};
 
 

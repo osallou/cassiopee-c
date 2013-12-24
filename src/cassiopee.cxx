@@ -5,11 +5,15 @@
 #include "Cassiopee.h"
 #include "CassiopeeConfig.h"
 
-#include "tree/tree.hh"
+
 
 using namespace std;
 
-TreeNode::TreeNode(char nc): c(nc), positions() {
+TreeNode::TreeNode(char* nc): c(nc), positions() {
+
+}
+
+TreeNode::TreeNode(): c(NULL), positions() {
 
 }
 
@@ -38,24 +42,27 @@ CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path)
 void CassieIndexer::index() {
 
 	tree<TreeNode> tr;
+
 	tree<TreeNode>::iterator top;
-	char* suffix;
 
 	top = tr.begin();
+
+
+	char* suffix;
+
 
 	cout << "I will update this file:" << this->filename << endl;
 	for (int i=0; i<this->seq_length; i++) {
 		cout << "Index suffix " << i << endl;
-		suffix=NULL;
+		//suffix=NULL;
+
 		// Extract a suffix
 		this->seqstream.getline(suffix, this->seq_length-1-i);
-		this->filltree(top,suffix);
+
+		this->filltree(tr, top, suffix);
 	}
 
-	delete(top);
-	top = NULL;
-	delete(tr);
-	tr = NULL;
+
 }
 
 string CassieIndexer::getSuffix(int pos) {
@@ -65,6 +72,22 @@ string CassieIndexer::getSuffix(int pos) {
     // Get the rest of the line and print it
     getline(this->seqstream, suffix);
 	return suffix;
+}
+
+void CassieIndexer::filltree(tree<TreeNode> tr, tree<TreeNode>::iterator top, char* suffix) {
+
+	tree<TreeNode>::iterator sib;
+
+	sib = tr.begin();
+
+	bool match = false;
+	int counter = 0;
+
+	while(!match && sib!=tr.end()) {
+		 cout << "compare with " << suffix[counter] << endl;
+	     cout << (*sib) << endl;
+	     ++sib;
+	}
 }
 
 
