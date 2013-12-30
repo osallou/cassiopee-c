@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 project (Cassiopee)
 
+link_directories(/usr/local/lib)
+
 set (Cassiopee_VERSION_MAJOR 1)
 set (Cassiopee_VERSION_MINOR 0)
 
@@ -41,7 +43,10 @@ configure_file (
 # so that we will find CassiopeeConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 
+
 add_executable(Cassiopee ${PROJECT_SOURCE_DIR}/cassiopee.cxx)
+
+target_link_libraries(Cassiopee glog)
 
 # add the install targets
 install (TARGETS Cassiopee DESTINATION bin)
