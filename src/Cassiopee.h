@@ -6,6 +6,26 @@
 
 using namespace std;
 
+
+/**
+ * Object to manage insertion and deletions
+ */
+class InDel {
+public:
+
+	int in;
+	int del;
+
+	int max_in;
+	int max_del;
+
+	InDel();
+
+	bool maxReached();
+
+
+};
+
 /**
  * Node in the suffix tree
  */
@@ -14,7 +34,10 @@ public:
 	/**
 	 * Character to match
 	 */
-	char* c;
+	char c;
+
+	int next;
+
 	/**
 	 * List of positions in sequence matching this node
 	 */
@@ -22,8 +45,10 @@ public:
 	/**
 	 * Creates a node from a char
 	 */
-	TreeNode(char* nc);
+	TreeNode(char nc);
+	TreeNode(char nc, int pos);
 	TreeNode();
+
 
 private:
 
@@ -31,9 +56,6 @@ private:
 };
 
 std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
-  if(a.c != NULL) {
-	  return strm << "TreeNode()";
-  }
   return strm << "TreeNode(" << a.c << ")";
 }
 
@@ -77,7 +99,7 @@ private:
 	/**
 	 * Fills sufix tree with input suffix
 	 */
-	void filltree(tree<TreeNode> tr, tree<TreeNode>::iterator top, char* suffix);
+	tree<TreeNode> filltree(tree<TreeNode> tr, tree<TreeNode>::iterator top, const char* suffix);
 };
 
 
