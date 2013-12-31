@@ -46,7 +46,7 @@ public:
 	 * Creates a node from a char
 	 */
 	TreeNode(char nc);
-	TreeNode(char nc, int pos);
+	TreeNode(char nc, long pos);
 	TreeNode();
 
 
@@ -83,20 +83,26 @@ public:
 	 * \param pos Position in the file
 	 * \return the suffix string
 	 */
-	string getSuffix(int pos);
+	string getSuffix(long pos);
 
 	/**
 	 * Launch the indexation of the input sequence
 	 */
 	void index();
 
+	list<long> search(string suffix);
+
+	void getMatchesFromNode(tree<TreeNode>::iterator sib);
+
 	tree<TreeNode> getTree();
+
+	list<long> matches;
 
 private:
 
 	char* filename;
 	ifstream seqstream;
-	int seq_length;
+	long seq_length;
 	tree<TreeNode> tr;
 
 	/**
@@ -105,7 +111,7 @@ private:
 	 * \param suffix Suffix to insert
 	 * \param pos Position of suffix in sequence
 	 */
-	void filltree(const char* suffix, int suffix_len, int pos);
+	void filltree(const char* suffix, long suffix_len, long pos);
 
 	/**
 	 * Fills a tree branch with the suffix starting at suffix_pos
@@ -116,7 +122,8 @@ private:
 	 * \param suffix_len length of the suffix (to avoid too many calculations)
 	 * \param pos Position of suffix in sequence
 	 */
-	void fillTreeWithSuffix(tree<TreeNode>::iterator sib, const char* suffix, int suffix_pos, int suffix_len, int pos);
+	void fillTreeWithSuffix(tree<TreeNode>::iterator sib, const char* suffix, long suffix_pos, long suffix_len, long pos);
+	void fillTreeWithSuffix(const char* suffix, long suffix_pos, long suffix_len, long pos);
 
 };
 
