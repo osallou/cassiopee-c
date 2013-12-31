@@ -40,7 +40,7 @@ CassieIndexer::~CassieIndexer() {
 	}
 }
 
-CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path)
+CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path, ios_base::in | ios_base::binary)
 {
 
     // If we couldn't open the input file stream for reading
@@ -58,31 +58,32 @@ CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path)
 
 void CassieIndexer::index() {
 
-	tree<TreeNode> tr;
 
-	tree<TreeNode>::iterator top;
-
-	top = tr.begin();
-
-	cout << "I will update this file:" << this->filename << endl;
+	LOG(WARNING) << "I will update this file:" << this->filename;
 
 	LOG(INFO) << "Indexing " << this->filename ;
 
-	for (int i=0; i<this->seq_length; i++) {
 
-		char* suffix = new char [this->seq_length-i];
+	for (int i=0; i<this->seq_length-1; i++) {
+	//for (int i=0; i<2; i++) {
 
-		cout << "Index suffix " << i << endl;
+		int suffix_len = this->seq_length - i -1;
+
+		char* suffix = new char [suffix_len];
+
+		LOG(INFO) << "Index suffix " << i;
 
 		this->seqstream.seekg(i, this->seqstream.beg);
 		//suffix=NULL;
 
 		// Extract a suffix
-		this->seqstream.read(suffix, this->seq_length-1-i);
+		this->seqstream.read(suffix, suffix_len);
 
-		// << "suffix " << this->seq_length-1-i << ", " << suffix;
+		LOG(INFO) << "Suffix: "  << suffix << ", length: " << suffix_len << ":" << strlen(suffix);
 
-		tr = this->filltree(tr, top, suffix);
+		this->filltree(suffix, suffix_len, i);
+
+		delete[] suffix;
 
 	}
 
@@ -98,37 +99,86 @@ string CassieIndexer::getSuffix(int pos) {
 	return suffix;
 }
 
-tree<TreeNode> CassieIndexer::filltree(tree<TreeNode> tr, tree<TreeNode>::iterator top, const char* suffix) {
+void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, const char* suffix, int suffix_pos, int suffix_len, int pos) {
+
+	tree<TreeNode>::iterator top_node = sib;
+
+	for(int i=suffix_pos;i<suffix_len-1;i++) {
+		char node_char = suffix[i];
+		TreeNode* node = new TreeNode(node_char);
+		if(i==suffix_len-2) {
+			// If last node, append position of suffix
+			LOG(INFO) << "add position to node";
+			std::list<long>::iterator end = node->positions.end();
+			node->positions.insert(end, pos);
+		}
+		//LOG(INFO) << "fill tree with new node " << node_char;
+		if(top_node==NULL) {
+			this->tr.insert(tr.end(),*node);
+			top_node = this->tr.begin();
+			//LOG(INFO) << "insert " << node_char << " at level " << this->tr.depth(top_node) ;
+		}
+		else {
+			top_node = this->tr.append_child(top_node,*node);
+			//LOG(INFO) << "insert " << node_char << " at level " << this->tr.depth(top_node) ;
+		}
+	}
+}
+
+tree<TreeNode> CassieIndexer::getTree() {
+	return this->tr;
+}
+
+void CassieIndexer::filltree(const char* suffix, int suffix_len, int pos) {
 
 	tree<TreeNode>::iterator sib;
 
-	sib = tr.begin();
+
+	sib = this->tr.begin();
 
 	bool match = false;
+
 	int counter = 0;
 
-	while(!match && sib!=tr.end()) {
-		LOG(INFO) << "compare " << suffix[counter] << "with " << sib->c ;
+	while(!match && sib!= this->tr.end() && sib.node!=0) {
+		LOG(INFO) << "compare " << suffix[counter] << " with " << sib->c << " at " << this->tr.depth(sib);
 
 		if(sib->c == suffix[counter]) {
-			// match
-			match = true;
-			std::list<long>::iterator end = sib->positions.end();
-			sib->positions.insert(end, counter);
+			int nb_childs = sib.number_of_children();
+			LOG(INFO) << "found match, check below, " << "node children " << nb_childs;
+            LOG(INFO) << "counter: " << counter << ", suffix: " << strlen(suffix);
+			if(counter==suffix_len-1) {
+				LOG(INFO) << "no more suffix";
+				match = true;
+				std::list<long>::iterator end = sib->positions.end();
+				sib->positions.insert(end, counter);
+			}
+			else if(nb_childs >0) {
+				LOG(INFO) << "check children";
+				// Continue parsing
+				sib = tr.begin(sib);
+				counter++;
+			}
+			else {
+				LOG(INFO) << "no more child, fill with suffix";
+				match = true;
+				// Last matching node, fill the rest of the node with current suffix
+				this->fillTreeWithSuffix(sib, suffix, counter+1, suffix_len, pos);
+			}
+
 		}
 		else {
 			// Switch to next node
-			++sib;
+			LOG(INFO) << "no match, compare sibling " << this->tr.depth(sib);
+			sib = tr.next_sibling(sib);
 		}
 	}
 
 	if(!match) {
 		char node_char = suffix[counter];
 		LOG(INFO) << "No match found, add new node " << node_char ;
-		TreeNode* node = new TreeNode(node_char, counter);
-		tr.insert(sib, *node);
+		this->fillTreeWithSuffix(NULL, suffix, counter, suffix_len, pos);
 	}
-	return tr;
 
 }
 

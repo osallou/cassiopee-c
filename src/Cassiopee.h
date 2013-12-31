@@ -90,16 +90,34 @@ public:
 	 */
 	void index();
 
+	tree<TreeNode> getTree();
+
 private:
 
 	char* filename;
 	ifstream seqstream;
 	int seq_length;
+	tree<TreeNode> tr;
 
 	/**
-	 * Fills sufix tree with input suffix
+	 * Fills suffix tree with input suffix
+	 *
+	 * \param suffix Suffix to insert
+	 * \param pos Position of suffix in sequence
 	 */
-	tree<TreeNode> filltree(tree<TreeNode> tr, tree<TreeNode>::iterator top, const char* suffix);
+	void filltree(const char* suffix, int suffix_len, int pos);
+
+	/**
+	 * Fills a tree branch with the suffix starting at suffix_pos
+	 *
+	 * \param sib Insert at node sib.
+	 * \param suffix Suffix to insert
+	 * \param suffix_pos Starting inserting from suffix position index
+	 * \param suffix_len length of the suffix (to avoid too many calculations)
+	 * \param pos Position of suffix in sequence
+	 */
+	void fillTreeWithSuffix(tree<TreeNode>::iterator sib, const char* suffix, int suffix_pos, int suffix_len, int pos);
+
 };
 
 
