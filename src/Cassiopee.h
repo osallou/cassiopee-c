@@ -15,9 +15,10 @@ public:
 
 	int in;
 	int del;
+	int subst;
 
-	int max_in;
-	int max_del;
+	int max_indel;
+	int max_subst;
 
 	InDel();
 
@@ -91,6 +92,9 @@ public:
 	void index();
 
 	list<long> search(string suffix);
+
+	void searchExact(string suffix, tree<TreeNode>::iterator sib);
+	void searchWithError(string suffix, InDel errors, tree<TreeNode>::iterator sib);
 
 	void getMatchesFromNode(tree<TreeNode>::iterator sib);
 
