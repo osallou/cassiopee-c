@@ -24,7 +24,6 @@ Only adding child nodes seems to work
 TODO
 ====
 
-* Add exact search
 * Add tree reduction
 * Add max depth of branches
 * Add search with errors (subst/indel)
