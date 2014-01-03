@@ -1,9 +1,12 @@
 cmake_minimum_required (VERSION 2.6)
 project (Cassiopee)
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 link_directories(/usr/local/lib)
 
-add_subdirectory (test)
 
 set (Cassiopee_VERSION_MAJOR 1)
 set (Cassiopee_VERSION_MINOR 0)
@@ -13,7 +16,6 @@ set (PROJECT_BINARY_DIR bin)
 set (PROJECT_DOC_DIR doc)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -47,12 +49,7 @@ configure_file (
 # so that we will find CassiopeeConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_library(Cassie ${PROJECT_SOURCE_DIR}/cassiopee.cxx)
-add_executable(Cassiopee ${PROJECT_SOURCE_DIR}/cassie.cxx)
+add_subdirectory (src)
+add_subdirectory (test)
 
-target_link_libraries(Cassiopee Cassie glog)
 
-# add the install targets
-install (TARGETS Cassiopee DESTINATION bin)
-install (FILES "${PROJECT_BINARY_DIR}/CassiopeeConfig.h"        
-         DESTINATION include)

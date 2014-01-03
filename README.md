@@ -18,6 +18,21 @@ Compilation
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_BUILD_TYPE=Debug .
 make
 
+
+Tests
+=====
+
+bin/test_cassiopee
+
+or 
+
+cd test; ctest -V
+
+Documentation
+============
+
+doxygen bin/Doxyfile
+
 BUGS
 ====
 Adding sibling nodes fails though with no error

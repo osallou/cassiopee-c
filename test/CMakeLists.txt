@@ -10,4 +10,4 @@ add_executable(test_cassiopee test.cxx)
 target_link_libraries(test_cassiopee Cassie glog cppunit)
 
 
-add_test(CassieTest test_cassiopee)
+add_test(NAME "TestCassie" COMMAND ${PROJECT_SOURCE_DIR}/test/test_cassiopee)
