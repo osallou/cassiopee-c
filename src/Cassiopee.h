@@ -15,15 +15,33 @@ using namespace std;
 class InDel {
 public:
 
+	/**
+	 * Number of insertion error
+	 */
 	int in;
+	/**
+	 * Number of deletion error
+	 */
 	int del;
+	/**
+	 * Number of substitution error
+	 */
 	int subst;
 
+	/**
+	 * Maximum number of insertion or deletion
+	 */
 	int max_indel;
+	/**
+	 * Maximum number of substitution
+	 */
 	int max_subst;
 
 	InDel();
 
+	/**
+	 * Checks if an error threshold has been reached
+	 */
 	bool maxReached();
 
 
@@ -39,16 +57,25 @@ public:
 	 */
 	char c;
 
-	int next;
 
 	/**
 	 * List of positions in sequence matching this node
 	 */
 	list<long> positions;
+
 	/**
 	 * Creates a node from a char
+	 *
+	 * \param nc character for this node
 	 */
 	TreeNode(char nc);
+
+	/**
+	 * Creates a node from a char
+	 *
+	 * \param nc character for this node
+	 * \param pos position of the character in the sequence
+	 */
 	TreeNode(char nc, long pos);
 	TreeNode();
 
@@ -93,15 +120,34 @@ public:
 	 */
 	void index();
 
+	/**
+	 * Search for a string in the indexed sequence
+	 *
+	 * \param suffix pattern to search
+	 * \return list of position in original sequence
+	 */
 	list<long> search(string suffix);
 
+	/*
 	void searchExact(string suffix, tree<TreeNode>::iterator sib);
 	void searchWithError(string suffix, InDel errors, tree<TreeNode>::iterator sib);
+	*/
 
+	/**
+	 * Sets all matching positions in matches from node
+	 *
+	 * \param sib Base node to search through in the tree
+	 */
 	void getMatchesFromNode(tree<TreeNode>::iterator sib);
 
+	/**
+	 * Get the tree matching the indexed sequence
+	 */
 	tree<TreeNode> getTree();
 
+	/**
+	 * List of positions in original sequence matching the search
+	 */
 	list<long> matches;
 
 private:

@@ -22,15 +22,15 @@ bool InDel::maxReached() {
 	return (max_indel > 0 && in+del >= max_indel) || (max_subst > 0 && subst >= max_subst);
 }
 
-TreeNode::TreeNode(char nc): c(nc), next(0) {
+TreeNode::TreeNode(char nc): c(nc) {
 
 }
 
-TreeNode::TreeNode(char nc, long pos): c(nc), next(pos) {
+TreeNode::TreeNode(char nc, long pos): c(nc) {
 
 }
 
-TreeNode::TreeNode(): c(), next(0) {
+TreeNode::TreeNode(): c() {
 
 }
 
