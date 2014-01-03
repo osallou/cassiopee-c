@@ -33,6 +33,7 @@ CassieIndexer::~CassieIndexer() {
 	if(this->seqstream) {
 		this->seqstream.close();
 	}
+	delete[] this->suffix;
 }
 
 CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
@@ -156,17 +157,21 @@ char* CassieIndexer::loadSuffix(long pos)  {
 
 	long suffix_len = min(this->MAX_SUFFIX,this->seq_length - pos - 1);
 
-	char* suffix = new char[suffix_len+1]();
+	//char* suffix = new char[suffix_len+1]();
+	delete[] this->suffix;
+	this->suffix = new char[suffix_len+1]();
 
 	this->seqstream.seekg(pos, this->seqstream.beg);
 
 	// Extract a suffix
-	this->seqstream.read(suffix, suffix_len);
+	this->seqstream.read(this->suffix, suffix_len);
 
     //LOG(INFO) << "Load suffix chunk "<< suffix;
-	this->suffix = suffix;
+	//this->suffix = suffix;
 
-	return suffix;
+
+
+	return this->suffix;
 }
 
 void CassieIndexer::reset_suffix() {
@@ -219,6 +224,8 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 
 	}
 
+	delete node;
+
 	if(suffix_len==1) {
 		return;
 	}
@@ -244,6 +251,7 @@ void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix
 			node->positions.insert(end, pos);
 		}
 		sib = this->tr.append_child(sib,*node);
+		delete node;
 	}
 }
 
@@ -339,6 +347,7 @@ void CassieIndexer::filltree(long pos) {
 				node->positions.insert(end, pos);
 			}
 			place_to_insert = this->tr.insert_after(place_to_insert, *node);
+			delete node;
 			this->fillTreeWithSuffix(place_to_insert, counter+1, pos);
 		}
 		//LOG(INFO) << "suffix " << suffix << " at " << pos;

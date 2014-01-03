@@ -75,20 +75,17 @@ int main (int argc, char *argv[])
   google::InitGoogleLogging(logfile);
   FLAGS_logtostderr = 1;
 
-  //char* sequence = argv[1];
   CassieIndexer* indexer = new CassieIndexer(sequence);
   indexer->index();
 
 
-
-  //string suffix = "gggc";
   list<long> matches = indexer->search(string(pattern));
   matches.sort();
   for (std::list<long>::iterator it = matches.begin(); it != matches.end(); it++) {
 	  LOG(INFO) << "Match at: " << *it;
   }
 
-
+  delete indexer;
 
 
   return 0;
