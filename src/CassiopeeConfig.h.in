@@ -3,3 +3,5 @@
 #define Cassiopee_VERSION_MINOR @Cassiopee_VERSION_MINOR@
 
 #define use_openmp @USE_OPENMP@
+
+#define SUFFIX_CHUNK_SIZE 10

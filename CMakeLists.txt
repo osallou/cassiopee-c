@@ -10,6 +10,10 @@ set (PROJECT_SOURCE_DIR src)
 set (PROJECT_BINARY_DIR bin)
 set (PROJECT_DOC_DIR doc)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+include( CTest )
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -20,7 +24,6 @@ WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
 endif(DOXYGEN_FOUND)
-
 
 FIND_PACKAGE(OpenMP)
 if(OPENMP_FOUND)
@@ -45,7 +48,6 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 
 add_executable(Cassiopee ${PROJECT_SOURCE_DIR}/cassiopee.cxx)
-
 target_link_libraries(Cassiopee glog)
 
 # add the install targets

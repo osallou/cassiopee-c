@@ -4,6 +4,8 @@
 
 #include "tree/tree.hh"
 
+#include "CassiopeeConfig.h"
+
 using namespace std;
 
 
@@ -109,25 +111,42 @@ private:
 	long seq_length;
 	tree<TreeNode> tr;
 
+	const long MAX_SUFFIX = SUFFIX_CHUNK_SIZE;
+	long suffix_position = -1;
+	char* suffix=NULL;
+
+	/**
+	 * Extract parts of suffix located at pos from stream with a max size of MAX_SUFFIX.
+	 */
+	char* loadSuffix(long pos);
+	/**
+	 * Get char from suffix located at position pos.
+	 */
+	char getCharAtSuffix(long pos);
+
+	/**
+	 * Reset current suffix; Mandatory before calling getCharAtSuffix on a new suffix
+	 */
+	void reset_suffix();
+
 	/**
 	 * Fills suffix tree with input suffix
 	 *
-	 * \param suffix Suffix to insert
 	 * \param pos Position of suffix in sequence
 	 */
-	void filltree(const char* suffix, long suffix_len, long pos);
+	void filltree(long pos);
 
 	/**
 	 * Fills a tree branch with the suffix starting at suffix_pos
 	 *
 	 * \param sib Insert at node sib.
-	 * \param suffix Suffix to insert
 	 * \param suffix_pos Starting inserting from suffix position index
-	 * \param suffix_len length of the suffix (to avoid too many calculations)
 	 * \param pos Position of suffix in sequence
 	 */
-	void fillTreeWithSuffix(tree<TreeNode>::iterator sib, const char* suffix, long suffix_pos, long suffix_len, long pos);
-	void fillTreeWithSuffix(const char* suffix, long suffix_pos, long suffix_len, long pos);
+	void fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos);
+	void fillTreeWithSuffix(long suffix_pos, long pos);
+
+
 
 };
 

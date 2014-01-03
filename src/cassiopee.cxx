@@ -1,9 +1,10 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
 #include <glog/logging.h>
+#include <unistd.h>
 
 #include "Cassiopee.h"
-#include "CassiopeeConfig.h"
+
 
 
 
@@ -136,39 +137,62 @@ void searchWithError(string suffix, InDel errors, tree<TreeNode>::iterator sib){
 }
 
 
+char CassieIndexer::getCharAtSuffix(long pos) {
+
+	assert(pos < this->seq_length && pos>=0);
+    //LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " < " << this->suffix_position + this->MAX_SUFFIX;
+	if(this->suffix_position >= 0 && pos >= this->suffix_position && pos<= this->suffix_position + this->MAX_SUFFIX ) {
+		return this->suffix[pos-this->suffix_position];
+	}
+	else {
+		//LOG(INFO) << "Extract new suffix chunk at " << pos;
+		// Extract new suffix part
+		this->loadSuffix(pos);
+		return this->suffix[pos - this->suffix_position];
+	}
+
+}
+
+char* CassieIndexer::loadSuffix(long pos)  {
+
+	// Set initial position
+	this->suffix_position = pos;
+
+	assert(pos < this->seq_length);
+
+	long suffix_len = min(this->MAX_SUFFIX,this->seq_length - pos - 1);
+
+	char* suffix = new char[suffix_len+1]();
+
+	this->seqstream.seekg(pos, this->seqstream.beg);
+
+	// Extract a suffix
+	this->seqstream.read(suffix, suffix_len);
+
+    //LOG(INFO) << "Load suffix chunk "<< suffix;
+	this->suffix = suffix;
+
+	return suffix;
+}
+
+void CassieIndexer::reset_suffix() {
+	this->suffix_position = -1;
+}
+
 void CassieIndexer::index() {
-
-
-	LOG(WARNING) << "I will update this file:" << this->filename;
 
 	LOG(INFO) << "Indexing " << this->filename ;
 
 
 	for (long i=0; i<this->seq_length-1; i++) {
-
-		long suffix_len = this->seq_length - i - 1;
-
-		char* suffix = new char[suffix_len+1]();
-
-		//LOG(INFO) << "Index suffix " << i;
-
-		this->seqstream.seekg(i, this->seqstream.beg);
-
-		// Extract a suffix
-		this->seqstream.read(suffix, suffix_len);
-
-		//LOG(INFO) << "Suffix: "  << suffix << ", length: " << suffix_len;
-
-		this->filltree(suffix, suffix_len, i);
-
-		delete[] suffix;
-
+		this->filltree(i);
 	}
 
 
 }
 
 string CassieIndexer::getSuffix(long pos) {
+
 	char* suffix;
 
     this->seqstream.seekg(pos);
@@ -177,10 +201,13 @@ string CassieIndexer::getSuffix(long pos) {
 	return suffix;
 }
 
-void CassieIndexer::fillTreeWithSuffix(const char* suffix, long suffix_pos, long suffix_len, long pos) {
+void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
+
 	tree<TreeNode>::iterator sib;
 
-	char node_char = suffix[0];
+	char node_char = this->getCharAtSuffix(pos+suffix_pos);
+	long suffix_len = this->seq_length - pos - 1;
+
 	TreeNode* node = new TreeNode(node_char);
 
 	if(suffix_len==1) {
@@ -202,14 +229,19 @@ void CassieIndexer::fillTreeWithSuffix(const char* suffix, long suffix_pos, long
 		return;
 	}
 
-	this->fillTreeWithSuffix(sib, suffix, suffix_pos+1, suffix_len, pos);
+	this->fillTreeWithSuffix(sib, suffix_pos+1, pos);
+
 }
 
 
-void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, const char* suffix, long suffix_pos, long suffix_len, long pos) {
+void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos) {
+
+
+	long suffix_len = this->seq_length - pos - 1;
 
 	for(long i=suffix_pos;i<suffix_len;i++) {
-		char node_char = suffix[i];
+		//char node_char = suffix[i];
+		char node_char = this->getCharAtSuffix(pos+i);
 		TreeNode* node = new TreeNode(node_char);
 		if(i==suffix_len-1) {
 			// If last node, append position of suffix
@@ -225,13 +257,13 @@ tree<TreeNode> CassieIndexer::getTree() {
 	return this->tr;
 }
 
-void CassieIndexer::filltree(const char* suffix, long suffix_len, long pos) {
+void CassieIndexer::filltree(long pos) {
 
 	tree<TreeNode>::iterator sib;
 	tree<TreeNode>::iterator last_sibling;
 	tree<TreeNode>::iterator place_to_insert;
 
-
+	long suffix_len = this->seq_length - pos - 1;
 
 	sib = this->tr.begin();
 	place_to_insert = this->tr.end();
@@ -245,9 +277,13 @@ void CassieIndexer::filltree(const char* suffix, long suffix_len, long pos) {
 	long counter = 0;
 
 	while(!match  && !nomore) {
-		//LOG(INFO) << "compare " << suffix[counter] << " with " << sib->c << " at " << this->tr.depth(sib);
 
-		if(sib->c == suffix[counter]) {
+		char suffix_char = this->getCharAtSuffix(pos+counter);
+
+		//LOG(INFO) << "compare " << suffix_char << " with " << sib->c << " at " << this->tr.depth(sib);
+
+
+		if(sib->c == suffix_char) {
 			head = false;
 			int nb_childs = sib.number_of_children();
 			//LOG(INFO) << "found match, check below, " << "node children " << nb_childs;
@@ -270,7 +306,7 @@ void CassieIndexer::filltree(const char* suffix, long suffix_len, long pos) {
 				//LOG(INFO) << "no more child, fill with suffix";
 				match = true;
 				// Last matching node, fill the rest of the node with current suffix
-				this->fillTreeWithSuffix(sib, suffix, counter+1, suffix_len, pos);
+				this->fillTreeWithSuffix(sib, counter+1, pos);
 				//LOG(INFO) << "suffix " << suffix << " at " << pos;
 			}
 
@@ -292,10 +328,11 @@ void CassieIndexer::filltree(const char* suffix, long suffix_len, long pos) {
 	}
 
 	if(!match) {
-		char node_char = suffix[counter];
+		char node_char = this->getCharAtSuffix(pos+counter);
+		//char node_char = suffix[counter];
 		if(head) {
 			//LOG(INFO) << "No match found, add new node " << node_char << " at head";
-			this->fillTreeWithSuffix(suffix, counter, suffix_len, pos);
+			this->fillTreeWithSuffix(counter, pos);
 		}
 		else {
 			//LOG(INFO) << "No match found, add new node " << node_char << " in tree at " << tr.depth(place_to_insert);
@@ -308,38 +345,89 @@ void CassieIndexer::filltree(const char* suffix, long suffix_len, long pos) {
 				node->positions.insert(end, pos);
 			}
 			place_to_insert = this->tr.insert_after(place_to_insert, *node);
-			this->fillTreeWithSuffix(place_to_insert, suffix, counter+1, suffix_len, pos);
+			this->fillTreeWithSuffix(place_to_insert, counter+1, pos);
 		}
 		//LOG(INFO) << "suffix " << suffix << " at " << pos;
 	}
 
 }
 
+void showUsage() {
+	 fprintf(stdout,"Usage:\n");
+	 fprintf(stdout,"\t-s: sequence to index\n");
+	 fprintf(stdout,"\t-p: pattern to search\n");
+	 fprintf(stdout,"\t-v: show version\n");
+	 fprintf(stdout,"\t-h: show this message\n");
+}
+
+void showVersion() {
+	 fprintf(stdout,"%s Version %d.%d\n",
+	            "Cassiopee",
+	            Cassiopee_VERSION_MAJOR,
+	            Cassiopee_VERSION_MINOR);
+}
 
 int main (int argc, char *argv[])
 {
-  if (argc < 2)
-    {
-    fprintf(stdout,"%s Version %d.%d\n",
-            argv[0],
-            Cassiopee_VERSION_MAJOR,
-            Cassiopee_VERSION_MINOR);
-    fprintf(stdout,"Usage: %s file\n",argv[0]);
-    return 1;
-    }
+  if (argc == 1) {
+	  showVersion();
+  	  showUsage();
+	  return 1;
+  }
+
+
+  int c;
+  char* sequence=NULL;
+  char* pattern=NULL;
+  opterr = 0;
+  while ((c = getopt (argc, argv, "hvs:p:")) != -1)
+      switch (c)
+      {
+         case 's':
+           sequence = strdup(optarg);
+           break;
+         case 'p':
+           pattern = strdup(optarg);
+           break;
+         case 'h':
+        	 showUsage();
+        	 return 0;
+         case 'v':
+        	 showVersion();
+           return 0;
+         case '?':
+           if (optopt == 's' || optopt == 'p')
+             fprintf (stderr, "Option -%s requires an argument.\n", (char*)optopt);
+           else if (isprint (optopt))
+             fprintf (stderr, "Unknown option `-%s'.\n", (char*)optopt);
+           else
+             fprintf (stderr,
+                      "Unknown option character `\\x%x'.\n",
+                      optopt);
+           return 1;
+         default:
+           abort ();
+      }
+
+  if(sequence==NULL||pattern==NULL) {
+      fprintf (stderr,
+               "Sequence file or pattern not specified in command line.\n");
+	  return 1;
+  }
+
 
   const char logfile[] = "cassiopee.log";
   google::InitGoogleLogging(logfile);
   FLAGS_logtostderr = 1;
 
-  char* sequence = argv[1];
+  //char* sequence = argv[1];
   CassieIndexer* indexer = new CassieIndexer(sequence);
   indexer->index();
 
 
 
-  string suffix = "gggc";
-  list<long> matches = indexer->search(suffix);
+  //string suffix = "gggc";
+  list<long> matches = indexer->search(string(pattern));
   matches.sort();
   for (std::list<long>::iterator it = matches.begin(); it != matches.end(); it++) {
 	  LOG(INFO) << "Match at: " << *it;
