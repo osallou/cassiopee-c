@@ -20,4 +20,6 @@ doc/*
 bin
 Makefile
 Cassiopee
+test/test_cassiopee
 CTestTestfile.cmake
+Testing

@@ -85,9 +85,12 @@ private:
 
 };
 
-std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
+#ifndef __CASSIOPEE_H_
+#define __CASSIOPEE_H_
+inline std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
   return strm << "TreeNode(" << a.c << ")";
 }
+#endif
 
 
 /**
