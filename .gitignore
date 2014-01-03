@@ -23,3 +23,6 @@ Cassiopee
 test/test_cassiopee
 CTestTestfile.cmake
 Testing
+
+# reports
+cppunit-report.xml
