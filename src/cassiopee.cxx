@@ -35,7 +35,7 @@ CassieIndexer::~CassieIndexer() {
 	}
 }
 
-CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path, ios_base::in | ios_base::binary), matches()
+CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
 {
 
     // If we couldn't open the input file stream for reading

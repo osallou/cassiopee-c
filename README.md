@@ -18,6 +18,10 @@ Compilation
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_BUILD_TYPE=Debug .
 make
 
+Static analysis
+==============
+
+CXX=/usr/share/clang/scan-build/c++-analyzer cmake .
 
 Tests
 =====

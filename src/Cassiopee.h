@@ -160,9 +160,9 @@ private:
 	long seq_length;
 	tree<TreeNode> tr;
 
-	const long MAX_SUFFIX = SUFFIX_CHUNK_SIZE;
-	long suffix_position = -1;
-	char* suffix=NULL;
+	const long MAX_SUFFIX;
+	long suffix_position;
+	char* suffix;
 
 	/**
 	 * Extract parts of suffix located at pos from stream with a max size of MAX_SUFFIX.

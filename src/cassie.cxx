@@ -52,7 +52,7 @@ int main (int argc, char *argv[])
            return 0;
          case '?':
            if (optopt == 's' || optopt == 'p')
-             fprintf (stderr, "Option -%s requires an argument.\n", (char*)optopt);
+             fprintf (stderr, "Option requires an argument.\n");
            else if (isprint (optopt))
              fprintf (stderr, "Unknown option `-%s'.\n", (char*)optopt);
            else
