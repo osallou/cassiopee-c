@@ -39,8 +39,7 @@ doxygen bin/Doxyfile
 
 BUGS
 ====
-Adding sibling nodes fails though with no error
-Only adding child nodes seems to work
+
 
 TODO
 ====
