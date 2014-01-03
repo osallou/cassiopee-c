@@ -6,6 +6,8 @@ Cassiopee index and search library C implementation
 Dependencies
 ===========
 
+cppunit
+
 Google log (glog)
 
 tree.hh
