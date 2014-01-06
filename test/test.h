@@ -2,13 +2,14 @@
 
 class CassiopeeTest : public CppUnit::TestFixture
 {
+
   CPPUNIT_TEST_SUITE( CassiopeeTest );
-  CPPUNIT_TEST( testExample );
+  CPPUNIT_TEST( testIndex );
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void setUp();
   void tearDown();
 
-  void testExample();
+  void testIndex();
 };

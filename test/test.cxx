@@ -6,10 +6,16 @@
 #include <cppunit/TestResult.h>
 
 #include "test.h"
+#include <unistd.h>
+#include <iterator>
+#include <stdio.h>
+#include "Cassiopee.h"
+
 
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( CassiopeeTest );
+
 
 
 void CassiopeeTest::setUp()
@@ -22,9 +28,38 @@ void CassiopeeTest::tearDown()
 }
 
 
-void CassiopeeTest::testExample()
+void CassiopeeTest::testIndex()
 {
-  CPPUNIT_FAIL( "not implemented" );
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  list<long> matches = searcher->search("ggc");
+	  matches.sort();
+	  if(matches.size()!=3) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  std::list<long>::iterator it = matches.begin();
+	  cout << "found " << *it <<endl;
+	  if(*it != 16) {
+		  CPPUNIT_FAIL( "wrong position" );
+	  }
+	  std::advance(it, 1);
+	  cout << "found " << *it <<endl;
+	  if(*it != 19) {
+		  CPPUNIT_FAIL( "wrong position" );
+	  }
+	  std::advance(it, 1);
+	  cout << "found " << *it <<endl;
+	  if(*it != 42) {
+		  CPPUNIT_FAIL( "wrong position" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
 }
 
 
