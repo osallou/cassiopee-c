@@ -16,16 +16,93 @@ bool InDel::maxReached() {
 	return (max_indel > 0 && in+del >= max_indel) || (max_subst > 0 && subst >= max_subst);
 }
 
-TreeNode::TreeNode(char nc): c(nc) {
+TreeNode::TreeNode(char nc): c(nc), next_pos(-1), next_length(0) {
 
 }
 
-TreeNode::TreeNode(char nc, long pos): c(nc) {
+TreeNode::TreeNode(char nc, long pos): c(nc), next_pos(-1), next_length(0) {
 
 }
 
-TreeNode::TreeNode(): c() {
+TreeNode::TreeNode(): c(), next_pos(-1), next_length(0) {
 
+}
+
+
+CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref) {
+}
+
+void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib) {
+
+	std::list<long> positions = sib->positions;
+	for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
+		  this->matches.insert(this->matches.end(), *it);
+	}
+
+	if(sib.number_of_children() > 0) {
+	  tree<TreeNode>::iterator leaf_iterator = sib.begin();
+	  while(leaf_iterator!= sib.end()) {
+
+			  std::list<long> positions = leaf_iterator->positions;
+			  for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
+				  //LOG(INFO) << "match at " << *it;
+				  this->matches.insert(this->matches.end(), *it);
+			  }
+
+	  ++leaf_iterator;
+	  }
+	}
+}
+
+list<long> CassieSearch::search(string suffix) {
+	this->matches.clear();
+
+	tree<TreeNode>* tr = this->indexer->getTree();
+
+	tree<TreeNode>::iterator sib;
+	sib = tr->begin();
+
+	tree<TreeNode>::iterator last_sibling;
+	last_sibling = tr->end();
+
+	long counter = 0;
+
+	LOG(INFO) << "Search " << suffix;
+
+
+	while(sib != last_sibling && sib.node!=0) {
+			//LOG(INFO) << "compare " << suffix[counter] << " with " << sib->c << " at " << this->tr.depth(sib);
+
+			if(sib->c == suffix[counter]) {
+
+				int nb_childs = sib.number_of_children();
+				//LOG(INFO) << "partial match, check below - " << nb_childs;
+				//LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
+				if(counter == suffix.length()-1) {
+					// Exact match, no more char to parse
+					// Search leafs
+					this->getMatchesFromNode(sib);
+					break;
+				}
+
+
+				if(nb_childs > 0) {
+					last_sibling = tr->end(sib);
+					sib = tr->begin(sib);
+					counter++;
+				}
+				else {
+					// No match
+					break;
+				}
+			}
+			else {
+				//LOG(INFO) << "No match, test sibling";
+				sib = tr->next_sibling(sib);
+			}
+	}
+
+	return this->matches;
 }
 
 
@@ -50,85 +127,6 @@ CassieIndexer::CassieIndexer(char* path): filename(path), seqstream(path, ios_ba
     this->seqstream.seekg (0, this->seqstream.end);
     this->seq_length = this->seqstream.tellg();
     this->seqstream.seekg (0, this->seqstream.beg);
-}
-
-void CassieIndexer::getMatchesFromNode(tree<TreeNode>::iterator sib) {
-
-	std::list<long> positions = sib->positions;
-	for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
-		  this->matches.insert(this->matches.end(), *it);
-	}
-
-	if(sib.number_of_children() > 0) {
-	  tree<TreeNode>::iterator leaf_iterator = sib.begin();
-	  while(leaf_iterator!= sib.end()) {
-
-			  std::list<long> positions = leaf_iterator->positions;
-			  for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
-				  //LOG(INFO) << "match at " << *it;
-				  this->matches.insert(this->matches.end(), *it);
-			  }
-
-	  ++leaf_iterator;
-	  }
-	}
-}
-
-list<long> CassieIndexer::search(string suffix) {
-	this->matches.clear();
-
-	tree<TreeNode>::iterator sib;
-	sib = this->tr.begin();
-
-	tree<TreeNode>::iterator last_sibling;
-	last_sibling = this->tr.end();
-
-	long counter = 0;
-
-	LOG(INFO) << "Search " << suffix;
-
-
-	while(sib != last_sibling && sib.node!=0) {
-			//LOG(INFO) << "compare " << suffix[counter] << " with " << sib->c << " at " << this->tr.depth(sib);
-
-			if(sib->c == suffix[counter]) {
-
-				int nb_childs = sib.number_of_children();
-				//LOG(INFO) << "partial match, check below - " << nb_childs;
-				//LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
-				if(counter == suffix.length()-1) {
-					// Exact match, no more char to parse
-					// Search leafs
-					this->getMatchesFromNode(sib);
-					break;
-				}
-
-
-				if(nb_childs > 0) {
-					last_sibling = tr.end(sib);
-					sib = tr.begin(sib);
-					counter++;
-				}
-				else {
-					// No match
-					break;
-				}
-			}
-			else {
-				//LOG(INFO) << "No match, test sibling";
-				sib = tr.next_sibling(sib);
-			}
-	}
-
-	return this->matches;
-}
-
-void searchExact(string suffix, tree<TreeNode>::iterator sib) {
-	LOG(FATAL) << "not yet implemented";
-}
-
-void searchWithError(string suffix, InDel errors, tree<TreeNode>::iterator sib){
-	LOG(FATAL) << "not yet implemented";
 }
 
 
@@ -252,11 +250,17 @@ void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix
 		}
 		sib = this->tr.append_child(sib,*node);
 		delete node;
+
+		if(DO_REDUCTION == 1) {
+			sib->next_pos = pos + i + 1;
+			sib->next_length = suffix_len - 1;
+			break;
+		}
 	}
 }
 
-tree<TreeNode> CassieIndexer::getTree() {
-	return this->tr;
+tree<TreeNode>* CassieIndexer::getTree() {
+	return &(this->tr);
 }
 
 void CassieIndexer::filltree(long pos) {

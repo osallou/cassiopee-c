@@ -78,13 +78,14 @@ int main (int argc, char *argv[])
   CassieIndexer* indexer = new CassieIndexer(sequence);
   indexer->index();
 
-
-  list<long> matches = indexer->search(string(pattern));
+  CassieSearch* searcher = new CassieSearch(indexer);
+  list<long> matches = searcher->search(string(pattern));
   matches.sort();
   for (std::list<long>::iterator it = matches.begin(); it != matches.end(); it++) {
 	  LOG(INFO) << "Match at: " << *it;
   }
 
+  delete searcher;
   delete indexer;
 
 

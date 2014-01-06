@@ -9,6 +9,8 @@
 using namespace std;
 
 
+
+
 /**
  * Object to manage insertion and deletions
  */
@@ -49,6 +51,12 @@ public:
 
 /**
  * Node in the suffix tree
+ *
+ * If tree is reduced (DO_REDUCTION=1), memory usage is highly reduced, keeping in memory only the branching nodes.
+ * Search is made after that looking at branch nodes and sequence content between nodes.
+ * In addition, data from file are analysed per chunk, limiting again loaded data in memory.
+ *
+ * This treatment requires however more disk usage (reads) and tree manipulations, increasing the index and search time for a gain on memory requirements.
  */
 class TreeNode {
 public:
@@ -62,6 +70,19 @@ public:
 	 * List of positions in sequence matching this node
 	 */
 	list<long> positions;
+
+	/**
+	 * When tree is reduced, store the location of next characters in input sequence file.
+	 * Reduction can be made from a branch up to the leaf or between 2 branches.
+	 * If next_pos is equal to -1, then no reduction is made.
+	 */
+	long next_pos;
+
+	/**
+	 * Length of remaining data to read in sequence file
+	 */
+	long next_length;
+
 
 	/**
 	 * Creates a node from a char
@@ -124,29 +145,9 @@ public:
 	void index();
 
 	/**
-	 * Search for a string in the indexed sequence
-	 *
-	 * \param suffix pattern to search
-	 * \return list of position in original sequence
-	 */
-	list<long> search(string suffix);
-
-	/*
-	void searchExact(string suffix, tree<TreeNode>::iterator sib);
-	void searchWithError(string suffix, InDel errors, tree<TreeNode>::iterator sib);
-	*/
-
-	/**
-	 * Sets all matching positions in matches from node
-	 *
-	 * \param sib Base node to search through in the tree
-	 */
-	void getMatchesFromNode(tree<TreeNode>::iterator sib);
-
-	/**
 	 * Get the tree matching the indexed sequence
 	 */
-	tree<TreeNode> getTree();
+	tree<TreeNode>* getTree();
 
 	/**
 	 * List of positions in original sequence matching the search
@@ -199,7 +200,43 @@ private:
 
 };
 
+/**
+ * Search object
+ *
+ */
+class CassieSearch {
 
+public:
+	/**
+	 * Main constructor
+	 *
+	 * \param index_ref Indexer for sequence
+	 */
+	CassieSearch(CassieIndexer* index_ref);
+
+	/**
+	 * List of positions in original sequence matching the search
+	 */
+	list<long> matches;
+
+	/**
+	 * Search for a string in the indexed sequence
+	 *
+	 * \param suffix pattern to search
+	 * \return list of position in original sequence
+	 */
+	list<long> search(string suffix);
+
+	/**
+	 * Sets all matching positions in matches from node
+	 *
+	 * \param sib Base node to search through in the tree
+	 */
+	void getMatchesFromNode(tree<TreeNode>::iterator sib);
+
+private:
+	CassieIndexer* indexer;
+};
 
 
 

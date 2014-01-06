@@ -5,3 +5,5 @@
 #define use_openmp @USE_OPENMP@
 
 #define SUFFIX_CHUNK_SIZE 10
+
+#define DO_REDUCTION 0
