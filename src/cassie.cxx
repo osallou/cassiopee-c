@@ -77,6 +77,7 @@ int main (int argc, char *argv[])
 
   CassieIndexer* indexer = new CassieIndexer(sequence);
   indexer->index();
+  LOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);
   list<long> matches = searcher->search(string(pattern));
@@ -88,6 +89,21 @@ int main (int argc, char *argv[])
   delete searcher;
   delete indexer;
 
+
+  indexer = new CassieIndexer(sequence);
+  indexer->do_reduction = true;
+  indexer->index();
+  LOG(INFO) << "Tree size: " <<indexer->getTree()->size();
+
+  searcher = new CassieSearch(indexer);
+  matches = searcher->search(string(pattern));
+  matches.sort();
+  for (std::list<long>::iterator it = matches.begin(); it != matches.end(); it++) {
+	  LOG(INFO) << "Match at: " << *it;
+  }
+
+  delete searcher;
+  delete indexer;
 
   return 0;
 }

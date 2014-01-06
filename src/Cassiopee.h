@@ -154,6 +154,16 @@ public:
 	 */
 	list<long> matches;
 
+	/**
+	 * Allow tree reduction
+	 */
+	bool do_reduction;
+
+	/**
+	 * Get char from suffix located at position pos.
+	 */
+	char getCharAtSuffix(long pos);
+
 private:
 
 	char* filename;
@@ -169,10 +179,7 @@ private:
 	 * Extract parts of suffix located at pos from stream with a max size of MAX_SUFFIX.
 	 */
 	char* loadSuffix(long pos);
-	/**
-	 * Get char from suffix located at position pos.
-	 */
-	char getCharAtSuffix(long pos);
+
 
 	/**
 	 * Reset current suffix; Mandatory before calling getCharAtSuffix on a new suffix
@@ -223,9 +230,28 @@ public:
 	 * Search for a string in the indexed sequence
 	 *
 	 * \param suffix pattern to search
+	 * \param clear Clear existing matches?
+	 * \return list of position in original sequence
+	 */
+	list<long> search(string suffix, bool clear);
+
+
+	/**
+	 * Search for a string in the indexed sequence.
+	 * Clear all previous matches.
+	 *
+	 * \param suffix pattern to search
 	 * \return list of position in original sequence
 	 */
 	list<long> search(string suffix);
+
+	/**
+	 * Search for multiple strings
+	 *
+	 * \param list of patterns to search
+	 * \return list of position in original sequence
+	 */
+	list<long> search(list<string> suffixes);
 
 	/**
 	 * Sets all matching positions in matches from node

@@ -43,17 +43,14 @@ void CassiopeeTest::testIndex()
 	  }
 
 	  std::list<long>::iterator it = matches.begin();
-	  cout << "found " << *it <<endl;
 	  if(*it != 16) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
-	  cout << "found " << *it <<endl;
 	  if(*it != 19) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
-	  cout << "found " << *it <<endl;
 	  if(*it != 42) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
