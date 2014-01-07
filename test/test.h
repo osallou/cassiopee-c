@@ -5,6 +5,7 @@ class CassiopeeTest : public CppUnit::TestFixture
 
   CPPUNIT_TEST_SUITE( CassiopeeTest );
   CPPUNIT_TEST( testIndex );
+  CPPUNIT_TEST( testIndexWithReduction );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -12,4 +13,5 @@ public:
   void tearDown();
 
   void testIndex();
+  void testIndexWithReduction();
 };
