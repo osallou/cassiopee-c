@@ -15,22 +15,27 @@ tree.hh
 Compilation
 ===========
 
-cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_BUILD_TYPE=Debug .
-make
+    cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Debug .
+    make
+
+Valgrind
+=======
+
+    valgrind --leak-check=full bin/Cassiopee  -s test/sequence.txt -p ggc
 
 Static analysis
 ==============
 
-CXX=/usr/share/clang/scan-build/c++-analyzer cmake .
+    CXX=/usr/share/clang/scan-build/c++-analyzer cmake .
 
 Tests
 =====
 
-bin/test_cassiopee
+    bin/test_cassiopee
 
 or 
 
-cd test; ctest -V
+    cd test; ctest -V
 
 Documentation
 ============

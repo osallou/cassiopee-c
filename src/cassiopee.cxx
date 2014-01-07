@@ -322,7 +322,9 @@ void CassieIndexer::filltree(long pos) {
 
 	long suffix_len = this->seq_length - pos - 1;
 
+
 	//LOG(INFO) << "new suffix " << pos << " l= " << suffix_len;
+
 
 	sib = this->tr.begin();
 	place_to_insert = this->tr.end();
@@ -355,10 +357,9 @@ void CassieIndexer::filltree(long pos) {
 			//LOG(INFO) << "found match, check below, " << "node children " << nb_childs;
             //LOG(INFO) << "counter: " << counter << ", suffix: " << strlen(suffix);
 			if(counter==suffix_len-1 && sib->next_pos<0) {
-				//TODO what if suffix_pos here ?
-
 				//LOG(INFO) << "no more suffix ";
 				match = true;
+				tree_reducted_pos = -1;
 				//LOG(INFO) << "suffix " << suffix << " at " << pos << ", d=" << tr.depth(sib);
 				sib->positions.push_back(pos);
 			}
@@ -394,7 +395,7 @@ void CassieIndexer::filltree(long pos) {
 					counter++;
 					suffix_char = this->getCharAtSuffix(sib->next_pos+counter);
 					// Tree reduction case and refer to chars in sequence
-					this->seqstream.seekg(pos+tree_reducted_pos, this->seqstream.beg);
+					this->seqstream.seekg(sib->next_pos+tree_reducted_pos, this->seqstream.beg);
 					// Extract a suffix
 					this->seqstream.read(&tree_char, 1);
 					//LOG(INFO) << "take next char in reduction: " << tree_char << " at " << sib->next_pos+tree_reducted_pos;
@@ -419,6 +420,7 @@ void CassieIndexer::filltree(long pos) {
 			else {
 				//LOG(INFO) << "no more child, fill with suffix";
 				match = true;
+				tree_reducted_pos = -1;
 				// Last matching node, fill the rest of the node with current suffix
 				this->fillTreeWithSuffix(sib, counter+1, pos);
 				//LOG(INFO) << "suffix " << suffix << " at " << pos;
@@ -427,7 +429,7 @@ void CassieIndexer::filltree(long pos) {
 		}
 		else {
 
-
+			tree_reducted_pos = -1;
 			// Switch to next node
 			//LOG(INFO) << "no match, compare sibling " << this->tr.depth(sib);
 			last_sibling = this->tr.end(sib);
@@ -456,8 +458,12 @@ void CassieIndexer::filltree(long pos) {
 
 			if(tree_reducted_pos > -1) {
             	// Add a new child matching last matched character
-				this->seqstream.seekg(place_to_insert->next_pos + tree_reducted_pos + 1, this->seqstream.beg);
+				this->seqstream.seekg(place_to_insert->next_pos + tree_reducted_pos, this->seqstream.beg);
 				this->seqstream.read(&tree_char, 1);
+
+				//LOG(INFO) << "add new node " << tree_char << ":" << place_to_insert->next_pos << ":" <<  tree_reducted_pos << " in tree at " << tr.depth(place_to_insert) << "," << place_to_insert->c;
+				//LOG(INFO) <<"insert "<<node_char;
+
             	TreeNode * tmp_node = new TreeNode(tree_char);
             	tree<TreeNode>::iterator old = place_to_insert;
             	tmp_node->next_length = place_to_insert->next_length - tree_reducted_pos - 1;
