@@ -1,4 +1,6 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
+
+enable_language(C CXX)
 project (Cassiopee)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -15,7 +17,7 @@ set (PROJECT_SOURCE_DIR src)
 set (PROJECT_BINARY_DIR bin)
 set (PROJECT_DOC_DIR doc)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
