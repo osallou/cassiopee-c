@@ -132,6 +132,11 @@ public:
 	~CassieIndexer();
 
 	/**
+	 * Generates a dot file representing the tree.
+	 */
+	void graph();
+
+	/**
 	 * Get the suffix content from a position
 	 *
 	 * \param pos Position in the file
@@ -164,6 +169,13 @@ public:
 	 */
 	char getCharAtSuffix(long pos);
 
+	/**
+	 * Fills suffix tree with input suffix
+	 *
+	 * \param pos Position of suffix in sequence
+	 */
+	void filltree(long pos);
+
 private:
 
 	char* filename;
@@ -176,6 +188,11 @@ private:
 	char* suffix;
 
 	/**
+	 * Graph the children of node
+	 */
+	long graphNode(tree<TreeNode>::iterator node, long counter, ofstream& myfile);
+
+	/**
 	 * Extract parts of suffix located at pos from stream with a max size of MAX_SUFFIX.
 	 */
 	char* loadSuffix(long pos);
@@ -186,12 +203,7 @@ private:
 	 */
 	void reset_suffix();
 
-	/**
-	 * Fills suffix tree with input suffix
-	 *
-	 * \param pos Position of suffix in sequence
-	 */
-	void filltree(long pos);
+
 
 	/**
 	 * Fills a tree branch with the suffix starting at suffix_pos
@@ -248,10 +260,10 @@ public:
 	/**
 	 * Search for multiple strings
 	 *
-	 * \param list of patterns to search
+	 * \param array of patterns to search
 	 * \return list of position in original sequence
 	 */
-	list<long> search(list<string> suffixes);
+	list<long> search(string suffixes[]);
 
 	/**
 	 * Sets all matching positions in matches from node

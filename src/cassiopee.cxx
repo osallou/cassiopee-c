@@ -57,11 +57,11 @@ void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib) {
 }
 
 
-list<long> CassieSearch::search(list<string> suffixes) {
+list<long> CassieSearch::search(string suffixes[]) {
 	this->matches.clear();
-#pragma omp parralel for if(use_openmp)
-	for (std::list<string>::iterator it = suffixes.begin(); it != suffixes.end(); it++) {
-		this->search(*it,false);
+#pragma omp parallel for if(use_openmp)
+	for (int it = 0; it < suffixes->size(); it++) {
+		this->search(suffixes[it],false);
 	}
 	return this->matches;
 }
@@ -71,7 +71,9 @@ list<long> CassieSearch::search(string suffix) {
 }
 
 list<long> CassieSearch::search(string suffix, bool clear) {
-	this->matches.clear();
+	if(clear) {
+		this->matches.clear();
+	}
 
 	tree<TreeNode>* tr = this->indexer->getTree();
 
@@ -89,21 +91,22 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 	char suffix_char = suffix[counter];
 
 	while(sib != last_sibling && sib.node!=0) {
-			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char ;
+		    //LOG(INFO) << *sib << "," << *last_sibling;
+			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
 			if(tree_char == suffix_char) {
-
 				int nb_childs = sib.number_of_children();
 				//LOG(INFO) << "partial match, check below - " << nb_childs;
 				//LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
 				if(counter == suffix.length()-1) {
+
 					// Exact match, no more char to parse
 					// Search leafs
 					this->getMatchesFromNode(sib);
 					break;
 				}
-
 				else if(sib->next_pos>=0){
+					LOG(INFO) << "next " << sib->next_pos << ", " << sib->next_length;
 					long tree_reducted_pos = -1;
 					while(tree_reducted_pos < sib->next_length && suffix_char == tree_char) {
 						counter++;
@@ -113,10 +116,10 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 						//LOG(INFO) << "match " << suffix_char << " with " << tree_char;
 					}
 				}
-
 				else if(nb_childs > 0) {
 					last_sibling = tr->end(sib);
 					sib = tr->begin(sib);
+					//last_sibling = tr->end(sib);
 					tree_char = sib->c;
 					counter++;
 					suffix_char = suffix[counter];
@@ -129,8 +132,9 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 			else {
 				//LOG(INFO) << "No match, test sibling";
 				sib = tr->next_sibling(sib);
+
 				if(sib.node != 0) {
-				tree_char = sib->c;
+					tree_char = sib->c;
 				}
 				else {
 					tree_char = '\0';
@@ -213,6 +217,46 @@ void CassieIndexer::reset_suffix() {
 	this->suffix_position = -1;
 }
 
+
+void CassieIndexer::graph() {
+	  ofstream myfile;
+	  myfile.open ("cassiopee.dot");
+	  int counter = 0;
+	  myfile << "digraph cassiopee {\n";
+	  myfile << "node" << 0 << " [label=\"head\"];\n";
+
+	  this->graphNode(NULL, counter, myfile);
+	  myfile << "}\n";
+	  myfile.close();
+}
+
+long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstream& myfile) {
+	tree<TreeNode>::iterator first;
+	tree<TreeNode>::iterator last;
+	if(node == NULL) {
+		 first = tr.begin();
+		 last = tr.end();
+	}
+	else {
+		first= node.begin();
+		last= node.end();
+	}
+	long child = parent+1;
+	while(first!=last && first.node!=0) {
+		//char* next_chars = new char[first->next_length];
+		//this->seqstream.seekg(first->next_pos, this->seqstream.beg);
+		//this->seqstream.read(next_chars, first->next_length);
+		myfile << "node" << parent << " -> " << "node" << child << ";\n";
+		myfile << "node" << child << " [label=\"" << first->c << "-" << first->next_length  << "\"];\n";
+		if(first.number_of_children()>0) {
+		  child = this->graphNode(first, child, myfile);
+		}
+		child++;
+		first = tr.next_sibling(first);
+	}
+    return child;
+}
+
 void CassieIndexer::index() {
 
 	LOG(INFO) << "Indexing " << this->filename ;
@@ -240,7 +284,7 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 	tree<TreeNode>::iterator sib;
 
 	char node_char = this->getCharAtSuffix(pos+suffix_pos);
-	long suffix_len = this->seq_length - pos - 1;
+	long suffix_len = this->seq_length - (pos+suffix_pos) -1;
 
 	TreeNode* node = new TreeNode(node_char);
 
@@ -273,7 +317,7 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos) {
 
 
-	long suffix_len = this->seq_length - pos - 1;
+	long suffix_len = this->seq_length - (pos+suffix_pos) -1;
 
 	for(long i=suffix_pos;i<suffix_len;i++) {
 		//char node_char = suffix[i];
@@ -296,6 +340,8 @@ void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix
 			sib->next_pos = pos + i + 1;
 			sib->next_length = suffix_len - 1;
 			//LOG(INFO) << "add position to node " << pos;
+			//LOG(INFO) << "next_pos " << sib->next_pos;
+			//LOG(INFO) << "next_length " << sib->next_length;
 			if(i!=suffix_len-1) {
 				// Position already added, this is a special case
 				sib->positions.push_back(pos);
@@ -373,12 +419,36 @@ void CassieIndexer::filltree(long pos) {
 						this->seqstream.seekg(sib->next_pos + tree_reducted_pos + 1, this->seqstream.beg);
 						this->seqstream.read(&tree_char, 1);
 		            	TreeNode * tmp_node = new TreeNode(tree_char);
-		            	tmp_node->next_length = sib->next_length - tree_reducted_pos - 1;
+		            	tmp_node->next_length = sib->next_length - tree_reducted_pos - 2;
 		            	tmp_node->next_pos = sib->next_pos +  tree_reducted_pos + 1;
 		            	sib->next_length = tree_reducted_pos ;
+		            	if(sib->next_length<=0) {
+		            		sib->next_pos = -1;
+		            		sib->next_length = 0;
+		            	}
+		            	if(tmp_node->next_length<=0) {
+		            		tmp_node->next_pos = -1;
+		            		tmp_node->next_length = 0;
+		            	}
 		            	tree<TreeNode>::iterator old = sib;
-		            	//sib->positions.push_back(pos);
-		            	sib = this->tr.append_child(sib, *tmp_node);
+
+		            	if(sib.number_of_children()>0) {
+		            		LOG(INFO) << "insert node between children";
+		            		// Move children to new node
+		            		tree_node_<TreeNode> *first = sib.node->first_child;
+		            		tree_node_<TreeNode> *last = sib.node->last_child;
+		            		sib.node->first_child=0;
+		            		sib.node->last_child=0;
+		            		sib = this->tr.append_child(sib, *tmp_node);
+		            		sib.node->first_child = first;
+		            		sib.node->last_child = last;
+		            		sib.node->first_child->parent=sib.node;
+		            		sib.node->last_child->parent=sib.node;
+		            	}
+		            	else {
+		            		sib = this->tr.append_child(sib, *tmp_node);
+		            	}
+
 		            	for (std::list<long>::iterator it = old->positions.begin(); it != old->positions.end(); it++) {
 		            		sib->positions.push_back(*it);
 		  			  	}
@@ -393,7 +463,7 @@ void CassieIndexer::filltree(long pos) {
 
 					tree_reducted_pos++;
 					counter++;
-					suffix_char = this->getCharAtSuffix(sib->next_pos+counter);
+					suffix_char = this->getCharAtSuffix(pos+counter);
 					// Tree reduction case and refer to chars in sequence
 					this->seqstream.seekg(sib->next_pos+tree_reducted_pos, this->seqstream.beg);
 					// Extract a suffix
@@ -437,7 +507,7 @@ void CassieIndexer::filltree(long pos) {
 			sib = tr.next_sibling(sib);
 			if(sib.node==0) {
 				nomore = true;
-				//LOG(INFO) << "nomore";
+				//LOG(INFO) << "no more";
 			}
 			else {
 				tree_char = sib->c;
@@ -462,14 +532,41 @@ void CassieIndexer::filltree(long pos) {
 				this->seqstream.read(&tree_char, 1);
 
 				//LOG(INFO) << "add new node " << tree_char << ":" << place_to_insert->next_pos << ":" <<  tree_reducted_pos << " in tree at " << tr.depth(place_to_insert) << "," << place_to_insert->c;
-				//LOG(INFO) <<"insert "<<node_char;
+				//LOG(INFO) <<"insert "<<node_char << "," << tree_reducted_pos;
 
             	TreeNode * tmp_node = new TreeNode(tree_char);
             	tree<TreeNode>::iterator old = place_to_insert;
-            	tmp_node->next_length = place_to_insert->next_length - tree_reducted_pos - 1;
+            	tmp_node->next_length = place_to_insert->next_length - tree_reducted_pos - 2;
             	tmp_node->next_pos = place_to_insert->next_pos +  tree_reducted_pos + 1;
             	place_to_insert->next_length = tree_reducted_pos ;
-            	place_to_insert = this->tr.append_child(place_to_insert, *tmp_node);
+            	if(place_to_insert->next_length<=0) {
+            		place_to_insert->next_pos = -1;
+            		place_to_insert->next_length = 0;
+            	}
+            	if(tmp_node->next_length<=0) {
+            		tmp_node->next_pos = -1;
+            		tmp_node->next_length = 0;
+            	}
+
+
+            	if(place_to_insert.number_of_children()>0) {
+            		//LOG(INFO) << "- insert node between children";
+            		// Move children to new node
+            		tree_node_<TreeNode> *first = place_to_insert.node->first_child;
+            		tree_node_<TreeNode> *last = place_to_insert.node->last_child;
+            		place_to_insert.node->first_child=0;
+            		place_to_insert.node->last_child=0;
+            		place_to_insert = this->tr.append_child(place_to_insert, *tmp_node);
+            		place_to_insert.node->first_child = first;
+            		place_to_insert.node->last_child = last;
+            		place_to_insert.node->first_child->parent=place_to_insert.node;
+            		place_to_insert.node->last_child->parent=place_to_insert.node;
+            	}
+            	else {
+            		place_to_insert = this->tr.append_child(place_to_insert, *tmp_node);
+            	}
+
+            	//place_to_insert = this->tr.append_child(place_to_insert, *tmp_node);
             	for (std::list<long>::iterator it = old->positions.begin(); it != old->positions.end(); it++) {
             		place_to_insert->positions.push_back(*it);
   			  	}

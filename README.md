@@ -37,6 +37,14 @@ or
 
     cd test; ctest -V
 
+Tree graph generation
+=====================
+
+API provides the graph method to generate a cassiopee.dot file.
+To generate the image from the file:
+
+    dot -Tpng cassiopee.dot > cassiopee.png
+
 Documentation
 ============
 
