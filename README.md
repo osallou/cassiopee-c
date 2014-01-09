@@ -57,7 +57,5 @@ BUGS
 TODO
 ====
 
-* Add tree reduction
-* Add max depth of branches
 * Add search with errors (subst/indel)
-* Manage dna/rna/protein specific alphabets (skip N, ambiguity....)
+* Manage dna/rna/protein specific alphabets (skip N or allow max N consecutive, ambiguity....)
