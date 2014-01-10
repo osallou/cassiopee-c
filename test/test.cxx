@@ -91,6 +91,46 @@ void CassiopeeTest::testIndexWithReduction()
 	  delete indexer;
 }
 
+void CassiopeeTest::testAmbiguity()
+{
+	char a = 'c';
+	char b = 'g';
+	if(Ambiguous::isequal(a,b)) {
+	CPPUNIT_FAIL( "wrong equal matching");
+	}
+	b = 'b'; // c or g or t
+	if(! Ambiguous::isequal(a,b)) {
+		CPPUNIT_FAIL( "wrong ambiguous matching on b");
+	}
+	a = 'b';
+	b = 'g';
+	if(! Ambiguous::isequal(a,b)) {
+		CPPUNIT_FAIL( "wrong ambiguous matching on b");
+	}
+	a = 'a';
+	b = 'n';
+	if(! Ambiguous::isequal(a,b)) {
+		CPPUNIT_FAIL( "wrong ambiguous matching on n");
+	}
+	a = 'a';
+	b = 'r';
+	if(! Ambiguous::isequal(a,b)) {
+		CPPUNIT_FAIL( "wrong ambiguous matching on r");
+	}
+	a = 'g';
+	b = 'r';
+	if(! Ambiguous::isequal(a,b)) {
+		CPPUNIT_FAIL( "wrong ambiguous matching on r");
+	}
+	a = 't';
+	b = 'r';
+	if(Ambiguous::isequal(a,b)) {
+		CPPUNIT_FAIL( "wrong ambiguous matching on r");
+	}
+
+}
+
+
 int main(int argc, char* argv[])
 {
   CppUnit::TestResultCollector result;
