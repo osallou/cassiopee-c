@@ -28,8 +28,80 @@ TreeNode::TreeNode(): c(), next_pos(-1), next_length(0) {
 
 }
 
+const char Ambiguous::K_MATCH[] = { 'g', 't', 'u' };
+const char Ambiguous::M_MATCH[] = { 'a', 'c' };
+const char Ambiguous::R_MATCH[] = { 'a', 'g' };
+const char Ambiguous::Y_MATCH[] = { 'c', 't', 'u' };
+const char Ambiguous::S_MATCH[] = { 'c', 'g' };
+const char Ambiguous::W_MATCH[] = { 'a', 't', 'u' };
+const char Ambiguous::B_MATCH[] = { 'c', 'g', 't', 'u' };
+const char Ambiguous::V_MATCH[] = { 'a', 'c', 'g' };
+const char Ambiguous::H_MATCH[] = { 'a', 'c', 't', 'u' };
+const char Ambiguous::D_MATCH[] = { 'a', 'g', 't', 'u' };
+const char Ambiguous::N_MATCH[] = { 'a', 'c', 'g', 't', 'u' };
 
-CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref) {
+bool Ambiguous::ismatchequal(char a, const char b[],int len) {
+	for(int i=0;i<len;i++) {
+		if(a==b[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Ambiguous::isequal(char a, char b) {
+	char ambi,nonambi;
+	if(a=='a' || a=='c' || a=='g' || a=='t' || a=='u') {
+		// ambiguity is on input b
+		ambi = b;
+		nonambi = a;
+	}
+	else {
+		// ambiguity is on input a
+		ambi = a;
+		nonambi = b;
+	}
+
+	switch(ambi) {
+	case 'k':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::K_MATCH, 3);
+	case 'm':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::M_MATCH, 2);
+	case 'r':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::R_MATCH, 2);
+	case 'y':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::Y_MATCH, 3);
+	case 's':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::S_MATCH, 2);
+	case 'w':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::W_MATCH, 3);
+	case 'b':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::B_MATCH, 4);
+	case 'v':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::V_MATCH, 3);
+	case 'h':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::H_MATCH, 4);
+	case 'd':
+		return Ambiguous::ismatchequal(nonambi,Ambiguous::D_MATCH, 4);
+	case 'n':
+		return true;
+	}
+	return false;
+}
+
+CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref), ambiguity(false), nmax(0), mode(0) {
+}
+
+bool CassieSearch::isequal(char a, char b) {
+	if(a==b) {
+		return true;
+	}
+	if(this->ambiguity && this->mode!=2) {
+		return Ambiguous::isequal(a,b);
+	}
+	else {
+		return a==b;
+	}
 }
 
 void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib) {
@@ -94,7 +166,7 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 		    //LOG(INFO) << *sib << "," << *last_sibling;
 			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
-			if(tree_char == suffix_char) {
+			if(this->isequal(tree_char,suffix_char)) {
 				int nb_childs = sib.number_of_children();
 				//LOG(INFO) << "partial match, check below - " << nb_childs;
 				//LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
@@ -108,7 +180,7 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 				else if(sib->next_pos>=0){
 					LOG(INFO) << "next " << sib->next_pos << ", " << sib->next_length;
 					long tree_reducted_pos = -1;
-					while(tree_reducted_pos < sib->next_length && suffix_char == tree_char) {
+					while(tree_reducted_pos < sib->next_length && this->isequal(tree_char,suffix_char)) {
 						counter++;
 						suffix_char = suffix[counter];
 						tree_reducted_pos++;

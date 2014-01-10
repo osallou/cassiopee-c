@@ -176,6 +176,7 @@ public:
 	 */
 	void filltree(long pos);
 
+
 private:
 
 	char* filename;
@@ -220,6 +221,42 @@ private:
 };
 
 /**
+ * Ambiguity character matches for DNA
+ */
+class Ambiguous {
+public:
+	/**
+	 * Checks if a char is equal to an other according to ambiguity
+	 *
+	 * \param a input char
+	 * \param b input char
+	 * \return true if characters match
+	 */
+	static bool isequal(char a, char b);
+private:
+	/**
+	 * Compares input character with a list of possible matches
+	 *
+	 * \param a input char, non ambiguous
+	 * \param b list of possible matches for ambiguity
+	 * \param len length of b array
+	 * \return true if a match one character of b
+	 */
+	static bool ismatchequal(char a, const char b[], int len);
+	static const char K_MATCH[];
+	static const char M_MATCH[];
+	static const char R_MATCH[];
+	static const char Y_MATCH[];
+	static const char S_MATCH[];
+	static const char W_MATCH[];
+	static const char B_MATCH[];
+	static const char V_MATCH[];
+	static const char H_MATCH[];
+	static const char D_MATCH[];
+	static const char N_MATCH[];
+};
+
+/**
  * Search object
  *
  */
@@ -237,6 +274,26 @@ public:
 	 * List of positions in original sequence matching the search
 	 */
 	list<long> matches;
+
+	/**
+	 * Allow alphabet ambiguity search. False by default.
+	 * N are by default ignored. To allow N matching, the nmax attribute must be set
+	 */
+	bool ambiguity;
+
+	/**
+	 * Allow N matching with alphabet ambiguity. nmax defines the maximum number of consecutive N allowed in match.
+	 */
+	int nmax;
+
+	/**
+	 * Search mode:
+	 *
+	 *  - 0: DNA
+	 *  - 1: RNA
+	 *  - 2: Protein
+	 */
+	int mode;
 
 	/**
 	 * Search for a string in the indexed sequence
@@ -272,8 +329,14 @@ public:
 	 */
 	void getMatchesFromNode(tree<TreeNode>::iterator sib);
 
+	/**
+	 * Compare two chars, with ambiguity is option is set
+	 */
+	bool isequal(char a,char b);
+
 private:
 	CassieIndexer* indexer;
+
 };
 
 

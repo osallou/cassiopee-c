@@ -58,4 +58,4 @@ TODO
 ====
 
 * Add search with errors (subst/indel)
-* Manage dna/rna/protein specific alphabets (skip N or allow max N consecutive, ambiguity....)
+* Manage dna/rna/protein specific alphabets (skip N or allow max N consecutive)

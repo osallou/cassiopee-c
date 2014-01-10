@@ -12,6 +12,9 @@ void showUsage() {
 	 fprintf(stdout,"\t-s: sequence to index\n");
 	 fprintf(stdout,"\t-p: pattern to search\n");
      fprintf(stdout,"\t-r: apply tree reduction\n");
+     fprintf(stdout,"\t-m: search mode: 0=DNA, 1=RNA, 2=Protein\n");
+     fprintf(stdout,"\t-a: allow alphabet ambiguity search\n");
+     fprintf(stdout,"\t-n: max consecutive N allowed matches in search\n");
 	 fprintf(stdout,"\t-v: show version\n");
 	 fprintf(stdout,"\t-h: show this message\n");
 }
@@ -37,8 +40,12 @@ int main (int argc, char *argv[])
   char* pattern=NULL;
   opterr = 0;
   bool reduction = false;
+  bool ambiguity = false;
+  int nmax = 0;
+  // DNA by default
+  int mode = 0;
 
-  while ((c = getopt (argc, argv, "rhvs:p:")) != -1)
+  while ((c = getopt (argc, argv, "marhvs:p:n:")) != -1)
       switch (c)
       {
          case 's':
@@ -52,6 +59,15 @@ int main (int argc, char *argv[])
         	 return 0;
          case 'r':
         	 reduction = true;
+        	 break;
+         case 'a':
+        	 ambiguity = true;
+        	 break;
+         case 'n':
+        	 nmax = atoi(optarg);
+        	 break;
+         case 'm':
+        	 mode = atoi(optarg);
         	 break;
          case 'v':
         	 showVersion();
@@ -89,6 +105,15 @@ int main (int argc, char *argv[])
   LOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);
+  if(nmax > 0) {
+	  searcher->ambiguity = true;
+  }
+  if(ambiguity) {
+	  searcher->ambiguity = true;
+	  if(nmax > 0) {
+		  searcher->nmax = nmax;
+	  }
+  }
   list<long> matches = searcher->search(string(pattern));
   matches.sort();
   for (std::list<long>::iterator it = matches.begin(); it != matches.end(); it++) {
