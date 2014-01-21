@@ -7,6 +7,7 @@ class CassiopeeTest : public CppUnit::TestFixture
   CPPUNIT_TEST( testIndex );
   CPPUNIT_TEST( testIndexWithReduction );
   CPPUNIT_TEST( testAmbiguity );
+  CPPUNIT_TEST( testSearchWithError );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -16,4 +17,5 @@ public:
   void testIndex();
   void testIndexWithReduction();
   void testAmbiguity();
+  void testSearchWithError();
 };

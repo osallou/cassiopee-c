@@ -37,8 +37,9 @@ void CassiopeeTest::testIndex()
 
 	  CassieSearch* searcher = new CassieSearch(indexer);
 	  searcher->search("ggc");
+	  searcher->sort();
 	  list<Match*> matches = searcher->matches;
-	  //matches.sort();
+
 	  if(matches.size()!=3) {
 		  CPPUNIT_FAIL( "wrong number of match" );
 	  }
@@ -70,8 +71,9 @@ void CassiopeeTest::testIndexWithReduction()
 
 	  CassieSearch* searcher = new CassieSearch(indexer);
 	  searcher->search("ggc");
+	  searcher->sort();
 	  list<Match*> matches = searcher->matches;
-	  //matches.sort();
+
 	  if(matches.size()!=3) {
 		  CPPUNIT_FAIL( "wrong number of match" );
 	  }
@@ -88,6 +90,36 @@ void CassiopeeTest::testIndexWithReduction()
 	  if((*it)->pos != 42) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
+
+	  delete searcher;
+	  delete indexer;
+}
+
+void CassiopeeTest::testSearchWithError()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = true;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->max_subst = 1;
+	  searcher->search("ggc");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+
+
+	  std::list<Match*>::iterator it = matches.begin();
+	  if((*it)->pos != 15) {
+		  CPPUNIT_FAIL( "wrong position" );
+	  }
+	  std::advance(it, 1);
+	  if((*it)->pos != 16) {
+		  CPPUNIT_FAIL( "wrong position" );
+	  }
+
 
 	  delete searcher;
 	  delete indexer;
