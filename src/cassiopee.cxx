@@ -165,6 +165,7 @@ void CassieSearch::search(string suffix) {
 }
 
 void CassieSearch::search(string suffix, bool clear) {
+	transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
 	if(clear) {
 		this->matches.clear();
 	}
@@ -351,6 +352,8 @@ char* CassieIndexer::loadSuffix(long pos)  {
 
 	// Extract a suffix
 	this->seqstream.read(this->suffix, suffix_len);
+
+	*this->suffix = tolower(*this->suffix);
 
     //LOG(INFO) << "Load suffix chunk "<< suffix;
 	//this->suffix = suffix;
