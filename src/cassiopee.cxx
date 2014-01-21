@@ -8,13 +8,10 @@
 using namespace std;
 
 
-InDel::InDel(): in(0),del(0), subst(0), max_indel(0), max_subst(0) {
+Match::Match(): in(0),del(0), subst(0), pos(-1) {
 
 }
 
-bool InDel::maxReached() {
-	return (max_indel > 0 && in+del >= max_indel) || (max_subst > 0 && subst >= max_subst);
-}
 
 TreeNode::TreeNode(char nc): c(nc), next_pos(-1), next_length(0) {
 
@@ -89,10 +86,18 @@ bool Ambiguous::isequal(char a, char b) {
 	return false;
 }
 
-CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref), ambiguity(false), nmax(0), mode(0) {
+CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref), ambiguity(false), nmax(0), mode(0), max_subst(0), max_indel(0) {
+	match_limits = new Match();
+}
+
+CassieSearch::~CassieSearch() {
+	// Delete matches
+	while(!this->matches.empty()) delete this->matches.front(), this->matches.pop_front();
+	delete match_limits;
 }
 
 bool CassieSearch::isequal(char a, char b) {
+
 	if(a==b) {
 		return true;
 	}
@@ -104,12 +109,19 @@ bool CassieSearch::isequal(char a, char b) {
 	}
 }
 
-void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib) {
-     //LOG(INFO) << "getMatchesFromNode " << sib->c << "," << indexer->getTree()->depth(sib) << ":" << sib.number_of_children();
+void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib, const int nbSubsts, const int nbIn, const int nbDel) {
+    //LOG(INFO) << "getMatchesFromNode " << sib->c << "," << indexer->getTree()->depth(sib) << ":" << sib.number_of_children();
 	std::list<long> positions = sib->positions;
+
 #pragma omp critical(dataupdate)
 	for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
-		this->matches.push_back(*it);
+		Match* match = new Match();
+		match->subst = nbSubsts;
+		match->in = nbIn;
+		match->del = nbDel;
+		//LOG(INFO) << "match1 at " << *it;
+		match->pos = *it;
+		this->matches.push_back(match);
 	}
 
 	if(sib.number_of_children() > 0) {
@@ -119,45 +131,74 @@ void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib) {
 			  std::list<long> positions = leaf_iterator->positions;
 #pragma omp critical(dataupdate)
 			  for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
-				  //LOG(INFO) << "match at " << *it;
-				  this->matches.push_back(*it);
+				  //LOG(INFO) << "match2 at " << *it;
+				  Match* match = new Match();
+				  match->subst = nbSubsts;
+				  match->in = nbIn;
+				  match->del = nbDel;
+				  match->pos = *it;
+				  this->matches.push_back(match);
 			  }
 
 	  ++leaf_iterator;
 	  }
+
 	}
 }
 
+void CassieSearch::sort() {
+	this->matches.sort(per_position());
+}
 
-list<long> CassieSearch::search(string suffixes[]) {
+
+void CassieSearch::search(string suffixes[]) {
 	this->matches.clear();
 #pragma omp parallel for if(use_openmp)
 	for (int it = 0; it < suffixes->size(); it++) {
 		this->search(suffixes[it],false);
 	}
-	return this->matches;
+
 }
 
-list<long> CassieSearch::search(string suffix) {
-	return this->search(suffix,true);
+void CassieSearch::search(string suffix) {
+	this->search(suffix,true);
 }
 
-list<long> CassieSearch::search(string suffix, bool clear) {
+void CassieSearch::search(string suffix, bool clear) {
 	if(clear) {
 		this->matches.clear();
 	}
 
 	tree<TreeNode>* tr = this->indexer->getTree();
 
+	// Search from root
+	this->searchAtNode(suffix, 0, NULL, 0, 0, 0, 0);
+
+}
+
+void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree<TreeNode>::iterator root, int nbSubst, int nbIn, int nbDel, int nbN) {
+
+	//LOG(INFO) << "searchAtNode" << suffix_pos << ", " << nbSubst;
+
+	if(root!=NULL && root.number_of_children()==0) {
+		return;
+	}
+
+	tree<TreeNode>* tr = this->indexer->getTree();
+
 	tree<TreeNode>::iterator sib;
-	sib = tr->begin();
-
 	tree<TreeNode>::iterator last_sibling;
-	last_sibling = tr->end();
 
-	long counter = 0;
+	if(root==NULL) {
+		sib = tr->begin();
+		last_sibling = tr->end();
+	}
+	else {
+		sib = tr->begin(root);
+		last_sibling = tr->end(root);
+	}
 
-	LOG(INFO) << "Search " << suffix;
+	long counter = suffix_pos;
 
 	char tree_char = sib->c;
 	char suffix_char = suffix[counter];
@@ -167,25 +208,45 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
 			if(this->isequal(tree_char,suffix_char)) {
+				//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
+
 				int nb_childs = sib.number_of_children();
 				//LOG(INFO) << "partial match, check below - " << nb_childs;
 				//LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
 				if(counter == suffix.length()-1) {
-
 					// Exact match, no more char to parse
 					// Search leafs
-					this->getMatchesFromNode(sib);
+					this->getMatchesFromNode(sib, nbSubst, nbIn, nbDel);
+
+					if(this->max_subst>0 && !this->maxReached(nbSubst, nbIn, nbDel)) {
+						// If one last substitution is allowed, also check with remaining siblings
+						sib = tr->next_sibling(sib);
+						while(sib.node!=0) {
+							this->getMatchesFromNode(sib, nbSubst+1, nbIn, nbDel);
+							sib = tr->next_sibling(sib);
+						}
+
+					}
 					break;
+
+
 				}
 				else if(sib->next_pos>=0){
-					LOG(INFO) << "next " << sib->next_pos << ", " << sib->next_length;
+					//LOG(INFO) << "next " << sib->next_pos << ", " << sib->next_length;
 					long tree_reducted_pos = -1;
-					while(tree_reducted_pos < sib->next_length && this->isequal(tree_char,suffix_char)) {
+					bool isequal = this->isequal(tree_char,suffix_char);
+					while(tree_reducted_pos < sib->next_length && isequal) {
 						counter++;
 						suffix_char = suffix[counter];
 						tree_reducted_pos++;
 						tree_char = this->indexer->getCharAtSuffix(sib->next_pos+tree_reducted_pos);
 						//LOG(INFO) << "match " << suffix_char << " with " << tree_char;
+						isequal = this->isequal(tree_char,suffix_char);
+						if(!isequal && this->max_subst>0 && !this->maxReached(nbSubst, nbIn, nbDel)) {
+							// Check for substitutions
+							isequal = true;
+							nbSubst++;
+						}
 					}
 				}
 				else if(nb_childs > 0) {
@@ -197,12 +258,24 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 					suffix_char = suffix[counter];
 				}
 				else {
-					// No match
 					break;
 				}
 			}
 			else {
-				//LOG(INFO) << "No match, test sibling";
+				if(this->max_subst>0 && !this->maxReached(nbSubst, nbIn, nbDel)) {
+					if(counter == suffix.length()-1) {
+						// Last character, allow it
+						this->getMatchesFromNode(sib, nbSubst+1, nbIn, nbDel);
+					}
+					else {
+						// Allow substitutions, so try child
+						this->searchAtNode(suffix, counter+1, sib, nbSubst+1, nbIn, nbDel, nbN);
+					}
+				}
+
+				// anyway, test siblings
+
+
 				sib = tr->next_sibling(sib);
 
 				if(sib.node != 0) {
@@ -214,9 +287,11 @@ list<long> CassieSearch::search(string suffix, bool clear) {
 			}
 	}
 
-	return this->matches;
 }
 
+bool CassieSearch::maxReached(int nbSubts, int nbIn, int nbDel) {
+	return (max_indel > 0 && nbIn+nbDel >= max_indel) || (max_subst > 0 && nbSubts >= max_subst);
+}
 
 CassieIndexer::~CassieIndexer() {
 	if(this->seqstream) {
@@ -388,8 +463,8 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 
 void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos) {
 
-
-	long suffix_len = this->seq_length - (pos+suffix_pos) -1;
+	//LOG(INFO) << "CHECK POS " << pos;
+	long suffix_len = this->seq_length - (pos+suffix_pos) ;
 
 	for(long i=suffix_pos;i<suffix_len;i++) {
 		//char node_char = suffix[i];

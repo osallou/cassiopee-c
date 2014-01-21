@@ -15,6 +15,8 @@ void showUsage() {
      fprintf(stdout,"\t-m: search mode: 0=DNA, 1=RNA, 2=Protein\n");
      fprintf(stdout,"\t-a: allow alphabet ambiguity search\n");
      fprintf(stdout,"\t-n: max consecutive N allowed matches in search\n");
+     fprintf(stdout,"\t-e: max substitution allowed matches in search\n");
+     fprintf(stdout,"\t-i: max indel allowed matches in search\n");
 	 fprintf(stdout,"\t-v: show version\n");
 	 fprintf(stdout,"\t-h: show this message\n");
 }
@@ -45,7 +47,10 @@ int main (int argc, char *argv[])
   // DNA by default
   int mode = 0;
 
-  while ((c = getopt (argc, argv, "marhvs:p:n:")) != -1)
+  int max_subst = 0;
+  int max_indel = 0;
+
+  while ((c = getopt (argc, argv, "e:i:marhvs:p:n:")) != -1)
       switch (c)
       {
          case 's':
@@ -65,6 +70,12 @@ int main (int argc, char *argv[])
         	 break;
          case 'n':
         	 nmax = atoi(optarg);
+        	 break;
+         case 'e':
+        	 max_subst = atoi(optarg);
+        	 break;
+         case 'i':
+        	 max_indel = atoi(optarg);
         	 break;
          case 'm':
         	 mode = atoi(optarg);
@@ -102,9 +113,15 @@ int main (int argc, char *argv[])
 	  indexer->do_reduction = true;
   }
   indexer->index();
+  indexer->graph();
   LOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);
+  // Allow 1 substitution for test
+  searcher->max_subst = max_subst;
+  searcher->max_indel = max_indel;
+
+
   if(nmax > 0) {
 	  searcher->ambiguity = true;
   }
@@ -114,11 +131,28 @@ int main (int argc, char *argv[])
 		  searcher->nmax = nmax;
 	  }
   }
-  list<long> matches = searcher->search(string(pattern));
-  matches.sort();
-  for (std::list<long>::iterator it = matches.begin(); it != matches.end(); it++) {
-	  LOG(INFO) << "Match at: " << *it;
+
+  searcher->search(string(pattern));
+  searcher->sort();
+  list<Match*> matches = searcher->matches;
+
+  char* match_str;
+  int p_length = string(pattern).length();
+  match_str = new char[p_length]();
+
+  for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
+	  LOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst;
+	  // For debug
+	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
+	  seqstream.seekg((*it)->pos, seqstream.beg);
+
+	  seqstream.read(match_str, p_length + 1);
+	  match_str[p_length] = '\0';
+	  LOG(INFO) << " => " << string(match_str);
+
+	  seqstream.close();
   }
+  delete[] match_str;
 
   delete searcher;
   delete indexer;

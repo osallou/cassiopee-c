@@ -14,7 +14,7 @@ using namespace std;
 /**
  * Object to manage insertion and deletions
  */
-class InDel {
+class Match {
 public:
 
 	/**
@@ -30,21 +30,10 @@ public:
 	 */
 	int subst;
 
-	/**
-	 * Maximum number of insertion or deletion
-	 */
-	int max_indel;
-	/**
-	 * Maximum number of substitution
-	 */
-	int max_subst;
 
-	InDel();
+	long pos;
 
-	/**
-	 * Checks if an error threshold has been reached
-	 */
-	bool maxReached();
+	Match();
 
 
 };
@@ -157,7 +146,7 @@ public:
 	/**
 	 * List of positions in original sequence matching the search
 	 */
-	list<long> matches;
+	list<Match> matches;
 
 	/**
 	 * Allow tree reduction
@@ -256,6 +245,15 @@ private:
 	static const char N_MATCH[];
 };
 
+
+struct per_position
+{
+    inline bool operator() (const Match* struct1, const Match* struct2)
+    {
+        return (struct1->pos < struct2->pos);
+    }
+};
+
 /**
  * Search object
  *
@@ -270,10 +268,17 @@ public:
 	 */
 	CassieSearch(CassieIndexer* index_ref);
 
+	~CassieSearch();
+
+	/**
+	 * Used to store max errors allowed
+	 */
+	Match* match_limits;
+
 	/**
 	 * List of positions in original sequence matching the search
 	 */
-	list<long> matches;
+	list<Match*> matches;
 
 	/**
 	 * Allow alphabet ambiguity search. False by default.
@@ -300,9 +305,8 @@ public:
 	 *
 	 * \param suffix pattern to search
 	 * \param clear Clear existing matches?
-	 * \return list of position in original sequence
 	 */
-	list<long> search(string suffix, bool clear);
+	void search(string suffix, bool clear);
 
 
 	/**
@@ -310,29 +314,54 @@ public:
 	 * Clear all previous matches.
 	 *
 	 * \param suffix pattern to search
-	 * \return list of position in original sequence
 	 */
-	list<long> search(string suffix);
+	void search(string suffix);
 
 	/**
 	 * Search for multiple strings
 	 *
 	 * \param array of patterns to search
-	 * \return list of position in original sequence
 	 */
-	list<long> search(string suffixes[]);
+	void search(string suffixes[]);
 
 	/**
 	 * Sets all matching positions in matches from node
 	 *
 	 * \param sib Base node to search through in the tree
+	 * \param nbSubst Number of substition found
+	 * \param nbIn Number of insertion found
+	 * \param nbDel Number of deletion found
 	 */
-	void getMatchesFromNode(tree<TreeNode>::iterator sib);
+	void getMatchesFromNode(tree<TreeNode>::iterator sib, const int nbSubst, const int nbIn, const int nbDel);
 
 	/**
 	 * Compare two chars, with ambiguity is option is set
 	 */
 	bool isequal(char a,char b);
+
+	/**
+	 * Compare suffix at a specific start root node (check with root children).
+	 */
+	void searchAtNode(string suffix, const long suffix_pos, const tree<TreeNode>::iterator root, int nbSubst, int nbIn, int nbDel, int nbN);
+
+	/**
+	 * Maximum number of insertion or deletion
+	 */
+	int max_indel;
+	/**
+	 * Maximum number of substitution
+	 */
+	int max_subst;
+
+	/**
+	 * Checks if an error threshold has been reached against input values
+	 */
+	bool maxReached(int nbSubst, int nbIn, int nbDel);
+
+	/**
+	 * Sort matches according to positions i nascending order
+	 */
+	void sort();
 
 private:
 	CassieIndexer* indexer;

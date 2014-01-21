@@ -36,22 +36,23 @@ void CassiopeeTest::testIndex()
 	  indexer->index();
 
 	  CassieSearch* searcher = new CassieSearch(indexer);
-	  list<long> matches = searcher->search("ggc");
-	  matches.sort();
+	  searcher->search("ggc");
+	  list<Match*> matches = searcher->matches;
+	  //matches.sort();
 	  if(matches.size()!=3) {
 		  CPPUNIT_FAIL( "wrong number of match" );
 	  }
 
-	  std::list<long>::iterator it = matches.begin();
-	  if(*it != 16) {
+	  std::list<Match*>::iterator it = matches.begin();
+	  if((*it)->pos != 16) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
-	  if(*it != 19) {
+	  if((*it)->pos != 19) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
-	  if(*it != 42) {
+	  if((*it)->pos != 42) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 
@@ -68,22 +69,23 @@ void CassiopeeTest::testIndexWithReduction()
 	  indexer->index();
 
 	  CassieSearch* searcher = new CassieSearch(indexer);
-	  list<long> matches = searcher->search("ggc");
-	  matches.sort();
+	  searcher->search("ggc");
+	  list<Match*> matches = searcher->matches;
+	  //matches.sort();
 	  if(matches.size()!=3) {
 		  CPPUNIT_FAIL( "wrong number of match" );
 	  }
 
-	  std::list<long>::iterator it = matches.begin();
-	  if(*it != 16) {
+	  std::list<Match*>::iterator it = matches.begin();
+	  if((*it)->pos != 16) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
-	  if(*it != 19) {
+	  if((*it)->pos != 19) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
-	  if(*it != 42) {
+	  if((*it)->pos != 42) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 
