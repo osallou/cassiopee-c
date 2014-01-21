@@ -27,3 +27,4 @@ Testing
 # reports
 cppunit-report.xml
 cassiopee.dot
+*.png
