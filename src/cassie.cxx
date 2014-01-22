@@ -134,25 +134,31 @@ int main (int argc, char *argv[])
 
   searcher->search(string(pattern));
   searcher->sort();
+  if(searcher->max_indel>0) {
+	  searcher->removeDuplicates();
+  }
   list<Match*> matches = searcher->matches;
 
   char* match_str;
   int p_length = string(pattern).length();
-  match_str = new char[p_length]();
+
 
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
-	  LOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst;
+	  LOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
 	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
 	  seqstream.seekg((*it)->pos, seqstream.beg);
-
+	  match_str = new char[p_length+1]();
+	  if(((*it)->in - (*it)->del) != 0) {
+		  p_length = string(pattern).length() + (*it)->in - (*it)->del;
+	  }
 	  seqstream.read(match_str, p_length + 1);
 	  match_str[p_length] = '\0';
 	  LOG(INFO) << " => " << string(match_str);
-
+	  delete[] match_str;
 	  seqstream.close();
   }
-  delete[] match_str;
+
 
   delete searcher;
   delete indexer;

@@ -18,6 +18,13 @@ class Match {
 public:
 
 	/**
+	 * define equality between matches
+	 */
+	bool operator==(const Match& p) const {
+	        return pos == p.pos && in+del == p.in + p.del;
+	}
+
+	/**
 	 * Number of insertion error
 	 */
 	int in;
@@ -271,6 +278,11 @@ public:
 	~CassieSearch();
 
 	/**
+	 * Remove matches with same position and same length.
+	 */
+	void removeDuplicates();
+
+	/**
 	 * Used to store max errors allowed
 	 */
 	Match* match_limits;
@@ -325,24 +337,10 @@ public:
 	void search(string suffixes[]);
 
 	/**
-	 * Sets all matching positions in matches from node
-	 *
-	 * \param sib Base node to search through in the tree
-	 * \param nbSubst Number of substition found
-	 * \param nbIn Number of insertion found
-	 * \param nbDel Number of deletion found
-	 */
-	void getMatchesFromNode(tree<TreeNode>::iterator sib, const int nbSubst, const int nbIn, const int nbDel);
-
-	/**
 	 * Compare two chars, with ambiguity is option is set
 	 */
 	bool isequal(char a,char b);
 
-	/**
-	 * Compare suffix at a specific start root node (check with root children).
-	 */
-	void searchAtNode(string suffix, const long suffix_pos, const tree<TreeNode>::iterator root, int nbSubst, int nbIn, int nbDel, int nbN);
 
 	/**
 	 * Maximum number of insertion or deletion
@@ -353,10 +351,7 @@ public:
 	 */
 	int max_subst;
 
-	/**
-	 * Checks if an error threshold has been reached against input values
-	 */
-	bool maxReached(int nbSubst, int nbIn, int nbDel);
+
 
 	/**
 	 * Sort matches according to positions i nascending order
@@ -364,7 +359,59 @@ public:
 	void sort();
 
 private:
+
+	/**
+	 * Compare two Match pointers
+	 */
+	static bool same_match (Match* first, Match* second)
+	{ return ( *first == *second ); }
+
 	CassieIndexer* indexer;
+
+	/**
+	 * Sets all matching positions in matches from node
+	 *
+	 * \param sib Base node to search through in the tree
+	 * \param nbSubst Number of substition found
+	 * \param nbIn Number of insertion found
+	 * \param nbDel Number of deletion found
+	 */
+	void getMatchesFromNode(tree<TreeNode>::iterator sib, const int nbSubst, const int nbIn, const int nbDel);
+
+
+
+	/**
+	 * Compare suffix at a specific start root node (check with root children).
+	 *
+	 * \param suffix Suffix to analyse
+	 * \param suffix_pos position on suffix
+	 * \param root Tree node root to analyse, starts with first child
+	 * \param nbSubst current number of substitutions found
+	 * \param nbIn current number of insertions found
+	 * \param nbDel current number of deletions found
+	 * \param nbN current consecutive N found
+	 */
+	void searchAtNode(string suffix, const long suffix_pos, const tree<TreeNode>::iterator root, int nbSubst, int nbIn, int nbDel, int nbN);
+
+	/**
+	 * Compare suffix at a specific start root node (check with root children).
+	 * \param suffix Suffix to analyse
+	 * \param suffix_pos position on suffix
+	 * \param root Tree node root to analyse
+	 * \param start_node root child node to start with (no first element)
+	 * \param nbSubst current number of substitutions found
+	 * \param nbIn current number of insertions found
+	 * \param nbDel current number of deletions found
+	 * \param nbN current consecutive N found
+	 */
+	void searchAtNode(string suffix, const long suffix_pos, const tree<TreeNode>::iterator root, const tree<TreeNode>::iterator start_node, int nbSubst, int nbIn, int nbDel, int nbN);
+
+	/**
+	 * Compare suffix in reducted string at node sib.
+	 * \return a match containing suffix counter positions and number fo errors found
+	 */
+	Match* searchAtreduction(const string suffix, const tree<TreeNode>::iterator sib, long counter, long tree_reducted_pos, int nbSubst, int nbIn, int nbDel, int nbN);
+
 
 };
 
