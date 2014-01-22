@@ -179,6 +179,9 @@ public:
 	 */
 	void filltree(long pos);
 
+	/**
+	 * Max depth to index, can limit index size if pattern to search are known of a maximum size
+	 */
 	long max_depth;
 
 
