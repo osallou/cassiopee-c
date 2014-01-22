@@ -17,6 +17,8 @@ void showUsage() {
      fprintf(stdout,"\t-n: max consecutive N allowed matches in search\n");
      fprintf(stdout,"\t-e: max substitution allowed matches in search\n");
      fprintf(stdout,"\t-i: max indel allowed matches in search\n");
+     fprintf(stdout,"\t-g: generates a dot file of the graph\n");
+     fprintf(stdout,"\t-d: max depth of the graph\n");
 	 fprintf(stdout,"\t-v: show version\n");
 	 fprintf(stdout,"\t-h: show this message\n");
 }
@@ -50,7 +52,10 @@ int main (int argc, char *argv[])
   int max_subst = 0;
   int max_indel = 0;
 
-  while ((c = getopt (argc, argv, "e:i:marhvs:p:n:")) != -1)
+  bool graph = false;
+  long max_graph = 0;
+
+  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:")) != -1)
       switch (c)
       {
          case 's':
@@ -62,6 +67,12 @@ int main (int argc, char *argv[])
          case 'h':
         	 showUsage();
         	 return 0;
+         case 'g':
+        	 graph = true;
+        	 break;
+         case 'd':
+        	 max_graph = atol(optarg);
+        	 break;
          case 'r':
         	 reduction = true;
         	 break;
@@ -112,8 +123,11 @@ int main (int argc, char *argv[])
   if(reduction) {
 	  indexer->do_reduction = true;
   }
+  indexer->max_depth = max_graph;
   indexer->index();
-  indexer->graph();
+  if(graph) {
+	  indexer->graph(max_graph);
+  }
   LOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);

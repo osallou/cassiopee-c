@@ -98,6 +98,11 @@ CassieSearch::~CassieSearch() {
 
 bool CassieSearch::isequal(char a, char b) {
 
+	if(this->mode!=2 && this->nmax<=0 && (a=='n' || 'b'=='n')) {
+		// No N support for DNA/RNA
+		return false;
+	}
+
 	if(a==b) {
 		return true;
 	}
@@ -403,7 +408,7 @@ CassieIndexer::~CassieIndexer() {
 	delete[] this->suffix;
 }
 
-CassieIndexer::CassieIndexer(char* path): do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
+CassieIndexer::CassieIndexer(char* path): max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
 {
 
     // If we couldn't open the input file stream for reading
@@ -471,18 +476,22 @@ void CassieIndexer::reset_suffix() {
 
 
 void CassieIndexer::graph() {
+	this->graph(0);
+}
+
+void CassieIndexer::graph(int depth) {
 	  ofstream myfile;
 	  myfile.open ("cassiopee.dot");
 	  int counter = 0;
 	  myfile << "digraph cassiopee {\n";
 	  myfile << "node" << 0 << " [label=\"head\"];\n";
 
-	  this->graphNode(NULL, counter, myfile);
+	  this->graphNode(NULL, counter, myfile, depth);
 	  myfile << "}\n";
 	  myfile.close();
 }
 
-long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstream& myfile) {
+long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstream& myfile, int maxdepth) {
 	tree<TreeNode>::iterator first;
 	tree<TreeNode>::iterator last;
 	if(node == NULL) {
@@ -500,8 +509,8 @@ long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstre
 		//this->seqstream.read(next_chars, first->next_length);
 		myfile << "node" << parent << " -> " << "node" << child << ";\n";
 		myfile << "node" << child << " [label=\"" << first->c << "-" << first->next_length  << "\"];\n";
-		if(first.number_of_children()>0) {
-		  child = this->graphNode(first, child, myfile);
+		if(first.number_of_children()>0 && (maxdepth==0 || tr.depth(first) < maxdepth)) {
+		  child = this->graphNode(first, child, myfile, maxdepth);
 		}
 		child++;
 		first = tr.next_sibling(first);
@@ -734,7 +743,7 @@ void CassieIndexer::filltree(long pos) {
 				break;
 
 			}
-			else if(nb_childs >0) {
+			else if(nb_childs >0 && (this->max_depth==0 || tr.depth(sib) < this->max_depth)) {
 				//LOG(INFO) << "check children";
 				// Continue parsing
 

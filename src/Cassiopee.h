@@ -133,6 +133,13 @@ public:
 	void graph();
 
 	/**
+	 * Generates a dot file representing the tree up to depth
+	 *
+	 * \param depth Max depth to print
+	 */
+	void graph(int depth);
+
+	/**
 	 * Get the suffix content from a position
 	 *
 	 * \param pos Position in the file
@@ -172,6 +179,8 @@ public:
 	 */
 	void filltree(long pos);
 
+	long max_depth;
+
 
 private:
 
@@ -187,7 +196,7 @@ private:
 	/**
 	 * Graph the children of node
 	 */
-	long graphNode(tree<TreeNode>::iterator node, long counter, ofstream& myfile);
+	long graphNode(tree<TreeNode>::iterator node, long counter, ofstream& myfile, int maxdepth);
 
 	/**
 	 * Extract parts of suffix located at pos from stream with a max size of MAX_SUFFIX.
