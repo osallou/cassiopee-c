@@ -426,13 +426,13 @@ char CassieIndexer::getCharAtSuffix(long pos) {
     //LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " <= " << this->suffix_position + this->MAX_SUFFIX;
 	if(this->suffix_position >= 0 && pos >= this->suffix_position && pos< this->suffix_position + this->MAX_SUFFIX ) {
 		//LOG(INFO) << pos - this->suffix_position << ": " << this->suffix[pos - this->suffix_position];
-		return this->suffix[pos - this->suffix_position];
+		return tolower(this->suffix[pos - this->suffix_position]);
 	}
 	else {
 		//LOG(INFO) << "Extract new suffix chunk at " << pos;
 		// Extract new suffix part
 		this->loadSuffix(pos);
-		return this->suffix[pos - this->suffix_position];
+		return tolower(this->suffix[pos - this->suffix_position]);
 	}
 
 }
@@ -511,6 +511,11 @@ long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstre
 
 void CassieIndexer::index() {
 
+	if(!(this->tr).empty()) {
+		LOG(INFO) << "Indexed already filled";
+		return;
+	}
+
 	LOG(INFO) << "Indexing " << this->filename ;
 
 
@@ -528,6 +533,7 @@ string CassieIndexer::getSuffix(long pos) {
     this->seqstream.seekg(pos);
     // Get the rest of the line and print it
     this->seqstream.getline(suffix,this->seq_length-1);
+    *suffix = tolower(*suffix);
 	return suffix;
 }
 
@@ -670,6 +676,7 @@ void CassieIndexer::filltree(long pos) {
 						match = true;
 						this->seqstream.seekg(sib->next_pos + tree_reducted_pos + 1, this->seqstream.beg);
 						this->seqstream.read(&tree_char, 1);
+						tree_char = tolower(tree_char);
 		            	TreeNode * tmp_node = new TreeNode(tree_char);
 		            	tmp_node->next_length = sib->next_length - tree_reducted_pos - 2;
 		            	tmp_node->next_pos = sib->next_pos +  tree_reducted_pos + 1;
@@ -720,6 +727,7 @@ void CassieIndexer::filltree(long pos) {
 					this->seqstream.seekg(sib->next_pos+tree_reducted_pos, this->seqstream.beg);
 					// Extract a suffix
 					this->seqstream.read(&tree_char, 1);
+					tree_char = tolower(tree_char);
 					//LOG(INFO) << "take next char in reduction: " << tree_char << " at " << sib->next_pos+tree_reducted_pos;
 				}
 				place_to_insert = sib;
@@ -782,6 +790,7 @@ void CassieIndexer::filltree(long pos) {
             	// Add a new child matching last matched character
 				this->seqstream.seekg(place_to_insert->next_pos + tree_reducted_pos, this->seqstream.beg);
 				this->seqstream.read(&tree_char, 1);
+				tree_char = tolower(tree_char);
 
 				//LOG(INFO) << "add new node " << tree_char << ":" << place_to_insert->next_pos << ":" <<  tree_reducted_pos << " in tree at " << tr.depth(place_to_insert) << "," << place_to_insert->c;
 				//LOG(INFO) <<"insert "<<node_char << "," << tree_reducted_pos;
