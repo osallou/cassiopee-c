@@ -225,7 +225,7 @@ Match* CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>
 
 
 void CassieSearch::removeDuplicates() {
-	// TODO deletion of elements, as we manage pointers does not free memory for elements
+	// TODO deletion of elements, as we manage pointers, list does not free memory for elements
 	  matches.unique(CassieSearch::same_match);
 }
 

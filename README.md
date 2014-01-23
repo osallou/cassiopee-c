@@ -3,6 +3,8 @@ cassiopee-c
 
 Cassiopee index and search library C implementation
 
+Expected input sequence is a one-line sequence with no header. CassiopeeKnife  (see later chapter) can be used to convert Fasta sequences in cassiopee input sequences.
+
 Dependencies
 ===========
 
@@ -54,8 +56,15 @@ BUGS
 ====
 
 
+CassiopeeKnife
+=============
+
+Convert an input Fasta sequence in a cassiopee input format (one line sequence
+with no header).
+
+
 TODO
 ====
 
-* Add search with errors (subst/indel)
+* Add search with errors (subst/indel) - ok for non reducted trees
 * Manage dna/rna/protein specific alphabets (skip N or allow max N consecutive)
