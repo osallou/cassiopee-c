@@ -420,9 +420,9 @@ private:
 
 	/**
 	 * Compare suffix in reducted string at node sib.
-	 * \return a match containing suffix counter positions and number fo errors found
+	 * \return true if matched
 	 */
-	Match* searchAtreduction(const string suffix, const tree<TreeNode>::iterator sib, long counter, long tree_reducted_pos, int nbSubst, int nbIn, int nbDel, int nbN);
+	bool searchAtreduction(const string suffix, const tree<TreeNode>::iterator sib, long counter, long tree_reducted_pos, int nbSubst, int nbIn, int nbDel, int nbN);
 
 
 };

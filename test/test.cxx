@@ -95,6 +95,27 @@ void CassiopeeTest::testIndexWithReduction()
 	  delete indexer;
 }
 
+void CassiopeeTest::testSearchInReduction()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = true;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->search("gggcgcgggtgggtgggagagaa");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+	  if(matches.size()!=1) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
+}
+
 void CassiopeeTest::testSearchWithError()
 {
 	  char sequence[] = "test/sequence.txt";
