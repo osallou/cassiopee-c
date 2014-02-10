@@ -186,7 +186,7 @@ void CassieSearch::search(string suffix, bool clear) {
 
 bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::iterator sib, long counter, long tree_reducted_pos, int nbSubst, int nbIn, int nbDel, int nbN) {
 
-	LOG(INFO) << "SEARCH AT REDUCTION";
+	//LOG(INFO) << "SEARCH AT REDUCTION";
 	char tree_char;
 	char suffix_char;
 	bool isequal = true;
@@ -208,7 +208,7 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 
 
 		tree_char = this->indexer->getCharAtSuffix(sib->next_pos+tree_reducted_pos);
-		LOG(INFO) << "match " << suffix_char << " with " << tree_char << " at " << tree_reducted_pos << ", max=" << sib->next_length;
+		//LOG(INFO) << "match " << suffix_char << " with " << tree_char << " at " << tree_reducted_pos << ", max=" << sib->next_length;
 		isequal = this->isequal(tree_char,suffix_char);
 		if(!isequal && this->max_subst>0 && nbSubst < this->max_subst) {
 			// Check for substitutions
@@ -308,14 +308,14 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 			}
 
 		    //LOG(INFO) << *sib << "," << *last_sibling;
-			LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
+			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
 			if(this->isequal(tree_char,suffix_char)) {
 				//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
 				int nb_childs = sib.number_of_children();
 				//LOG(INFO) << "partial match, check below - " << nb_childs;
-				LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
+				//LOG(INFO) << "filled? " << counter << ":" << suffix.length()-1;
 				if(counter == suffix.length()-1) {
 					// Exact match, no more char to parse
 					// Search leafs
