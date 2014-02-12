@@ -9,6 +9,10 @@ class CassiopeeTest : public CppUnit::TestFixture
   CPPUNIT_TEST( testSearchInReduction );
   CPPUNIT_TEST( testAmbiguity );
   CPPUNIT_TEST( testSearchWithError );
+  CPPUNIT_TEST( testSearchAfterN );
+  CPPUNIT_TEST( testSearchWithN );
+  CPPUNIT_TEST( testReducedSearchAfterN );
+  CPPUNIT_TEST( testReducedSearchWithN );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -20,4 +24,9 @@ public:
   void testSearchInReduction();
   void testAmbiguity();
   void testSearchWithError();
+  void testSearchAfterN();
+  void testSearchWithN();
+  void testReducedSearchAfterN();
+  void testReducedSearchWithN();
+
 };

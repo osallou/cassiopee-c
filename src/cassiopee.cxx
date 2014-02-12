@@ -98,7 +98,7 @@ CassieSearch::~CassieSearch() {
 
 bool CassieSearch::isequal(char a, char b) {
 
-	if(this->mode!=2 && this->nmax<=0 && (a=='n' || 'b'=='n')) {
+	if(this->mode!=2 && (a=='n' || 'b'=='n')) {
 		// No N support for DNA/RNA
 		return false;
 	}
@@ -200,7 +200,7 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 			/**
 			 * TODO Manage indels
 			 */
-			LOG(INFO) << "CALL REDUCTION AGAIN";
+			//LOG(INFO) << "CALL REDUCTION AGAIN";
 			this->searchAtreduction(suffix, sib, counter, tree_reducted_pos+1, nbSubst, nbIn+1, nbDel, nbN);
 			this->searchAtreduction(suffix, sib, counter+1, tree_reducted_pos, nbSubst, nbIn, nbDel+1, nbN);
 
@@ -208,8 +208,24 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 
 
 		tree_char = this->indexer->getCharAtSuffix(sib->next_pos+tree_reducted_pos);
+
 		//LOG(INFO) << "match " << suffix_char << " with " << tree_char << " at " << tree_reducted_pos << ", max=" << sib->next_length;
-		isequal = this->isequal(tree_char,suffix_char);
+		//isequal = this->isequal(tree_char,suffix_char);
+
+		bool isequal = this->isequal(tree_char,suffix_char);
+		if(!isequal) {
+			// If DNA/RNA and tree matches a N, check on max consecutive N allowed
+			if(this->mode!=2 && tree_char == 'n') {
+				nbN++;
+				if(nbN <= this->nmax) {
+					isequal = true;
+				}
+			}
+			else {
+				nbN = 0;
+			}
+		}
+
 		if(!isequal && this->max_subst>0 && nbSubst < this->max_subst) {
 			// Check for substitutions
 			isequal = true;
@@ -283,6 +299,7 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 
 	while(sib != last_sibling && sib.node!=0) {
 
+
 			if(this->max_indel > 0 && nbIn+nbDel < this->max_indel) {
 				//LOG(INFO) << "Check for indel, cur= " << sib->c;
 				// Move on suffix, keep same base node
@@ -310,7 +327,25 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 		    //LOG(INFO) << *sib << "," << *last_sibling;
 			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
-			if(this->isequal(tree_char,suffix_char)) {
+			bool isequal = this->isequal(tree_char,suffix_char);
+			if(!isequal) {
+				// If DNA/RNA and tree matches a N, check on max consecutive N allowed
+				if(this->mode!=2 && tree_char == 'n') {
+
+					if(this->nmax>0 && nbN < this->nmax) {
+						if(counter == suffix.length()-1) {
+							// Last character, allow it
+							this->getMatchesFromNode(sib, nbSubst, nbIn, nbDel);
+						}
+						else {
+							// Allow substitutions, so try child
+							this->searchAtNode(suffix, counter+1, sib, nbSubst, nbIn, nbDel, nbN+1);
+						}
+					}
+				}
+			}
+
+			if(isequal) {
 				//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
 
 				int nb_childs = sib.number_of_children();
@@ -368,7 +403,6 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 				}
 
 				// anyway, test siblings
-
 
 				sib = tr->next_sibling(sib);
 
@@ -565,17 +599,16 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 
 
 void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos) {
-
-	//LOG(INFO) << "CHECK POS " << pos;
-	long suffix_len = this->seq_length - (pos+suffix_pos) ;
+	long suffix_len = this->seq_length - pos -1 ;
 
 	for(long i=suffix_pos;i<suffix_len;i++) {
 		//char node_char = suffix[i];
 		char node_char = this->getCharAtSuffix(pos+i);
 		if(node_char == '\0') {
+			//LOG(INFO) << "break";
 			break;
 		}
-		//LOG(INFO) << "add char " << node_char << " from pos " << pos << " at " << pos+i << ", l= " << suffix_len;
+		//LOG(INFO) << "add char " << node_char << " from pos " << pos <<  "to" << pos + suffix_len << " at " << pos+i << ", l= " << suffix_len;
 		TreeNode* node = new TreeNode(node_char);
 		if(i==suffix_len-1) {
 			// If last node, append position of suffix

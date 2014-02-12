@@ -41,7 +41,8 @@ void CassiopeeTest::testIndex()
 	  list<Match*> matches = searcher->matches;
 
 	  if(matches.size()!=3) {
-		  CPPUNIT_FAIL( "wrong number of match" );
+		  cerr <<  matches.size() << "\n";
+		  CPPUNIT_FAIL( "wrong number of match");
 	  }
 
 	  std::list<Match*>::iterator it = matches.begin();
@@ -185,6 +186,93 @@ void CassiopeeTest::testAmbiguity()
 
 }
 
+
+void CassiopeeTest::testSearchAfterN()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = false;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->search("tata");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+	  if(matches.size()==0) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
+}
+
+void CassiopeeTest::testSearchWithN()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = false;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->nmax = 1;
+	  searcher->search("gtata");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+	  if(matches.size()==0) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
+}
+
+
+void CassiopeeTest::testReducedSearchAfterN()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = true;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->search("tata");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+	  if(matches.size()==0) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
+}
+
+void CassiopeeTest::testReducedSearchWithN()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = true;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->nmax = 1;
+	  searcher->search("gtata");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+	  if(matches.size()==0) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
+}
 
 int main(int argc, char* argv[])
 {

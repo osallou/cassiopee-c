@@ -137,7 +137,7 @@ int main (int argc, char *argv[])
 
 
   if(nmax > 0) {
-	  searcher->ambiguity = true;
+	  ambiguity = true;
   }
   if(ambiguity) {
 	  searcher->ambiguity = true;
