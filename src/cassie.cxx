@@ -19,6 +19,7 @@ void showUsage() {
      fprintf(stdout,"\t-i: max indel allowed matches in search\n");
      fprintf(stdout,"\t-g: generates a dot file of the graph\n");
      fprintf(stdout,"\t-d: max depth of the graph\n");
+     fprintf(stdout,"\t-o: output format: 0:tsv (default), 1:json\n");
 	 fprintf(stdout,"\t-v: show version\n");
 	 fprintf(stdout,"\t-h: show this message\n");
 }
@@ -55,7 +56,9 @@ int main (int argc, char *argv[])
   bool graph = false;
   long max_graph = 0;
 
-  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:")) != -1)
+  int format = 0;
+
+  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:o:")) != -1)
       switch (c)
       {
          case 's':
@@ -82,6 +85,9 @@ int main (int argc, char *argv[])
          case 'n':
         	 nmax = atoi(optarg);
         	 break;
+         case 'o':
+           format = atoi(optarg);
+           break;
          case 'e':
         	 max_subst = atoi(optarg);
         	 break;
@@ -117,7 +123,7 @@ int main (int argc, char *argv[])
 
   const char logfile[] = "cassiopee.log";
   google::InitGoogleLogging(logfile);
-  FLAGS_logtostderr = 1;
+  //FLAGS_logtostderr = 1;
 
   CassieIndexer* indexer = new CassieIndexer(sequence);
   if(reduction) {
@@ -128,7 +134,7 @@ int main (int argc, char *argv[])
   if(graph) {
 	  indexer->graph(max_graph);
   }
-  LOG(INFO) << "Tree size: " <<indexer->getTree()->size();
+  DLOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);
   // Allow 1 substitution for test
@@ -158,7 +164,7 @@ int main (int argc, char *argv[])
 
 
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
-	  LOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
+	  DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
 	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
 	  seqstream.seekg((*it)->pos, seqstream.beg);
@@ -168,7 +174,14 @@ int main (int argc, char *argv[])
 	  }
 	  seqstream.read(match_str, p_length + 1);
 	  match_str[p_length] = '\0';
-	  LOG(INFO) << " => " << string(match_str);
+	  DLOG(INFO) << " => " << string(match_str);
+    if(format == 0) {
+        cout << (*it)->pos << "\t" <<  (*it)->subst << "\t" << (*it)->in << "\t"
+<< (*it)->del << "\n";
+    }
+    else {
+        LOG(INFO) << "JSON format not yet implemented";
+    }
 	  delete[] match_str;
 	  seqstream.close();
   }

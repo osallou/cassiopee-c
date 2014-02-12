@@ -538,11 +538,11 @@ long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstre
 void CassieIndexer::index() {
 
 	if(!(this->tr).empty()) {
-		LOG(INFO) << "Indexed already filled";
+		DLOG(INFO) << "Indexed already filled";
 		return;
 	}
 
-	LOG(INFO) << "Indexing " << this->filename ;
+	DLOG(INFO) << "Indexing " << this->filename ;
 
 
 	for (long i=0; i<this->seq_length-1; i++) {
