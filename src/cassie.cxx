@@ -160,10 +160,13 @@ int main (int argc, char *argv[])
   list<Match*> matches = searcher->matches;
 
   char* match_str;
-  int p_length = string(pattern).length();
-
-
+  int p_length = 0;
+  bool is_first = true;
+  if(format==1) {
+    cout << "[";
+  }
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
+      p_length = string(pattern).length();
 	  DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
 	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
@@ -176,16 +179,25 @@ int main (int argc, char *argv[])
 	  match_str[p_length] = '\0';
 	  DLOG(INFO) << " => " << string(match_str);
     if(format == 0) {
-        cout << (*it)->pos << "\t" <<  (*it)->subst << "\t" << (*it)->in << "\t"
-<< (*it)->del << "\n";
+        cout << (*it)->pos << "\t" << p_length << "\t" <<  (*it)->subst << "\t" << (*it)->in+(*it)->del << "\t" << (*it)->in << "\t" << (*it)->del << "\n";
     }
     else {
-        LOG(INFO) << "JSON format not yet implemented";
+        if(is_first) {
+          is_first = false;
+        }
+        else { cout << ","; }
+        cout << "{\"position\": " << (*it)->pos << ",";
+        cout << " \"length\": " << p_length << ",";
+        cout << " \"substitution\": " <<  (*it)->subst << ",";
+        cout << " \"indel\": " << (*it)->in+(*it)->del << ",";
+        cout << " \"in\": " << (*it)->in << ",";
+        cout << " \"del\": " << (*it)->del << "}";
     }
 	  delete[] match_str;
 	  seqstream.close();
   }
 
+  if(format==1) { cout << "]\n"; }
 
   delete searcher;
   delete indexer;

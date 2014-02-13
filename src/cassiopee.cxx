@@ -190,27 +190,21 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 	char tree_char;
 	char suffix_char;
 	bool isequal = true;
-	while(counter < suffix.length() -1 && tree_reducted_pos < sib->next_length - 1 && isequal) {
+	while(counter < suffix.length() -1 && tree_reducted_pos < sib->next_length - 1 && isequal && sib->next_pos+tree_reducted_pos <  this->indexer->seq_length - 1 ) {
 
 		counter++;
 		suffix_char = suffix[counter];
 		tree_reducted_pos++;
 
 		if(this->max_indel > 0 && nbIn+nbDel < this->max_indel) {
-			/**
-			 * TODO Manage indels
-			 */
 			//LOG(INFO) << "CALL REDUCTION AGAIN";
 			this->searchAtreduction(suffix, sib, counter, tree_reducted_pos+1, nbSubst, nbIn+1, nbDel, nbN);
 			this->searchAtreduction(suffix, sib, counter+1, tree_reducted_pos, nbSubst, nbIn, nbDel+1, nbN);
 
 		}
 
-
 		tree_char = this->indexer->getCharAtSuffix(sib->next_pos+tree_reducted_pos);
-
 		//LOG(INFO) << "match " << suffix_char << " with " << tree_char << " at " << tree_reducted_pos << ", max=" << sib->next_length;
-		//isequal = this->isequal(tree_char,suffix_char);
 
 		bool isequal = this->isequal(tree_char,suffix_char);
 		if(!isequal) {
@@ -443,7 +437,6 @@ CassieIndexer::CassieIndexer(char* path): max_depth(0),do_reduction(false), file
 
 
 char CassieIndexer::getCharAtSuffix(long pos) {
-
 	assert(pos < this->seq_length && pos>=0);
     //LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " <= " << this->suffix_position + this->MAX_SUFFIX;
 	if(this->suffix_position >= 0 && pos >= this->suffix_position && pos< this->suffix_position + this->MAX_SUFFIX ) {

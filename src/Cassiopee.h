@@ -184,12 +184,12 @@ public:
 	 */
 	long max_depth;
 
+	long seq_length;
 
 private:
 
 	char* filename;
 	ifstream seqstream;
-	long seq_length;
 	tree<TreeNode> tr;
 
 	const long MAX_SUFFIX;
