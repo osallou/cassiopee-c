@@ -1,5 +1,6 @@
 
 add_library(Cassie cassiopee.cxx)
+add_library(Cassielib SHARED cassiopee.cxx)
 add_executable(Cassiopee cassie.cxx)
 add_executable(CassiopeeKnife knife.cxx)
 
