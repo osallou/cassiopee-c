@@ -11,6 +11,7 @@ void showUsage() {
 	 fprintf(stdout,"Usage:\n");
 	 fprintf(stdout,"\t-s: sequence to index\n");
 	 fprintf(stdout,"\t-p: pattern to search\n");
+     fprintf(stdout,"\t-f: file containing pattern to search\n");
      fprintf(stdout,"\t-r: apply tree reduction\n");
      fprintf(stdout,"\t-m: search mode: 0=DNA, 1=RNA, 2=Protein\n");
      fprintf(stdout,"\t-a: allow alphabet ambiguity search\n");
@@ -42,7 +43,9 @@ int main (int argc, char *argv[])
 
   int c;
   char* sequence=NULL;
-  char* pattern=NULL;
+  string pattern;
+  bool is_pattern = false;
+  char* pattern_file=NULL;
   opterr = 0;
   bool reduction = false;
   bool ambiguity = false;
@@ -58,14 +61,19 @@ int main (int argc, char *argv[])
 
   int format = 0;
 
-  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:o:")) != -1)
+  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:o:f:")) != -1)
       switch (c)
       {
          case 's':
            sequence = strdup(optarg);
            break;
          case 'p':
-           pattern = strdup(optarg);
+           pattern = string(optarg);
+           is_pattern = true;
+           break;
+         case 'f':
+           pattern_file = strdup(optarg);
+           is_pattern = true;
            break;
          case 'h':
         	 showUsage();
@@ -114,15 +122,28 @@ int main (int argc, char *argv[])
            abort ();
       }
 
-  if(sequence==NULL||pattern==NULL) {
+  if(sequence==NULL|| ! is_pattern) {
       fprintf (stderr,
                "Sequence file or pattern not specified in command line.\n");
 	  return 1;
   }
 
-
   const char logfile[] = "cassiopee.log";
   google::InitGoogleLogging(logfile);
+
+
+  if(pattern_file!=NULL) {
+    ifstream pfile(pattern_file);
+    if(pfile.is_open()) {
+      // Read only first line
+      while( getline(pfile, pattern)) { 
+         DLOG(INFO) << "Search pattern " << pattern;
+         break;
+      }
+      pfile.close();
+    }
+  }
+
   //FLAGS_logtostderr = 1;
 
   CassieIndexer* indexer = new CassieIndexer(sequence);
@@ -152,7 +173,7 @@ int main (int argc, char *argv[])
 	  }
   }
 
-  searcher->search(string(pattern));
+  searcher->search(pattern);
   searcher->sort();
   if(searcher->max_indel>0) {
 	  searcher->removeDuplicates();
@@ -166,14 +187,14 @@ int main (int argc, char *argv[])
     cout << "[";
   }
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
-      p_length = string(pattern).length();
+      p_length = pattern.length();
 	  DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
 	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
 	  seqstream.seekg((*it)->pos, seqstream.beg);
 	  match_str = new char[p_length+1]();
 	  if(((*it)->in - (*it)->del) != 0) {
-		  p_length = string(pattern).length() + (*it)->in - (*it)->del;
+		  p_length = pattern.length() + (*it)->in - (*it)->del;
 	  }
 	  seqstream.read(match_str, p_length + 1);
 	  match_str[p_length] = '\0';
