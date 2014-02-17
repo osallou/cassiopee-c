@@ -21,6 +21,8 @@ void showUsage() {
      fprintf(stdout,"\t-g: generates a dot file of the graph\n");
      fprintf(stdout,"\t-d: max depth of the graph\n");
      fprintf(stdout,"\t-o: output format: 0:tsv (default), 1:json\n");
+     fprintf(stdout,"\t-x: minimum position in sequence\n");
+     fprintf(stdout,"\t-y: maximum position in sequence\n");
 	 fprintf(stdout,"\t-v: show version\n");
 	 fprintf(stdout,"\t-h: show this message\n");
 }
@@ -55,13 +57,15 @@ int main (int argc, char *argv[])
 
   int max_subst = 0;
   int max_indel = 0;
+  int min = 0;
+  int max = -1;
 
   bool graph = false;
   long max_graph = 0;
 
   int format = 0;
 
-  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:o:f:")) != -1)
+  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:o:f:x:y:")) != -1)
       switch (c)
       {
          case 's':
@@ -84,6 +88,13 @@ int main (int argc, char *argv[])
          case 'd':
         	 max_graph = atol(optarg);
         	 break;
+         case 'x':
+             min = atol(optarg);
+             break;
+         case 'y':
+             max = atol(optarg);
+             break;
+
          case 'r':
         	 reduction = true;
         	 break;
@@ -187,6 +198,9 @@ int main (int argc, char *argv[])
     cout << "[";
   }
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
+      if((*it)->pos < min || (max>-1 && (*it)->pos > max)) {
+          continue;
+      }
       p_length = pattern.length();
 	  DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
