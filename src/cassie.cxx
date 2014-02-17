@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
     cout << "[";
   }
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
-      if((*it)->pos < min || (max>-1 && (*it)->pos > max)) {
+      if((*it)->pos < min || (max>0 && (*it)->pos > max)) {
           continue;
       }
       p_length = pattern.length();
