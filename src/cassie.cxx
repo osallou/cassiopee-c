@@ -148,8 +148,10 @@ int main (int argc, char *argv[])
     if(pfile.is_open()) {
       // Read only first line
       while( getline(pfile, pattern)) { 
-         DLOG(INFO) << "Search pattern " << pattern;
-         break;
+         if(pattern.at(0)!='>') {
+           DLOG(INFO) << "Search pattern " << pattern;
+           break;
+         }
       }
       pfile.close();
     }
