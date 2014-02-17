@@ -12,7 +12,7 @@ cppunit
 
 Google log (glog)
 
-tree.hh
+tree.hh (included)
 
 Compilation
 ===========
@@ -66,5 +66,4 @@ with no header).
 TODO
 ====
 
-* Add search with errors (subst/indel) - ok for non reducted trees
-* Manage dna/rna/protein specific alphabets (skip N or allow max N consecutive)
+* Save and load indexed sequence
