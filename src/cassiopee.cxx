@@ -419,7 +419,7 @@ CassieIndexer::~CassieIndexer() {
 	delete[] this->suffix;
 }
 
-CassieIndexer::CassieIndexer(char* path): max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
+CassieIndexer::CassieIndexer(char* path): max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
 {
 
     // If we couldn't open the input file stream for reading
@@ -530,6 +530,14 @@ long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstre
 
 void CassieIndexer::index() {
 
+	string index_file = string(this->filename)+".cass.idx";
+	if (ifstream(index_file.c_str()))
+	{
+	     LOG(INFO) << "Index file exists, loading it" << std::endl;
+	     this->load();
+	     return;
+	}
+
 	if(!(this->tr).empty()) {
 		DLOG(INFO) << "Indexed already filled";
 		return;
@@ -542,7 +550,74 @@ void CassieIndexer::index() {
 		this->filltree(i);
 	}
 
+}
 
+
+
+void CassieIndexer::save() {
+	if((this->tr).empty()) {
+		cerr << "Index is empty" << endl;
+	}
+
+	tree<TreeNode>::iterator node = this->tr.begin();
+	tree<TreeNode>::iterator end = this->tr.end();
+	while(node!=end) {
+        // write class instance to archive
+		TreeNode ar_node = node.node->data;
+        this->serialized_nodes.push_back(ar_node);
+        if(node.number_of_children()==0) {
+        	// This is a leaf, so add a termination endpoint
+        	TreeNode end_node = TreeNode('0');
+        	this->serialized_nodes.push_back(end_node);
+        }
+        tree<TreeNode>::iterator sibling = tr.next_sibling(node);
+        if(sibling.node == 0) {
+        	// This was last sibling, add a termination endpoint
+        	TreeNode end_node = TreeNode('0');
+        	this->serialized_nodes.push_back(end_node);
+        }
+		++node;
+	}
+	DLOG(INFO) << "Number of nodes: " << this->serialized_nodes.size();
+
+	string index_file = string(this->filename)+".cass.idx";
+	ofstream ofs(index_file.c_str());
+	boost::archive::text_oarchive oa(ofs);
+
+	oa << this->serialized_nodes;
+	ofs.close();
+	this->serialized_nodes.clear();
+}
+
+
+void CassieIndexer::load() {
+	cerr << "Load Not yet implemented" << endl;
+    // create and open an archive for input
+	string index_file = string(this->filename)+".cass.idx";
+    ifstream ifs(index_file.c_str());
+    boost::archive::text_iarchive ia(ifs);
+
+
+	tree<TreeNode>::iterator sib;
+	sib = this->tr.begin();
+
+    ia >> this->serialized_nodes;
+    for (std::list<TreeNode>::const_iterator iterator = this->serialized_nodes.begin(), end = this->serialized_nodes.end(); iterator != end; ++iterator) {
+    	cout << "new node";
+    	if(iterator->c != '0') {
+    		cout << "append child";
+    		sib = this->tr.append_child(sib, *iterator);
+    	}
+    	else {
+    		// Should be back to parent
+    		sib = sib.node->parent;
+    	}
+    }
+    this->serialized_nodes.clear();
+
+    cout << this->getTree()->size();
+
+    // archive and stream closed when destructors are called
 }
 
 string CassieIndexer::getSuffix(long pos) {

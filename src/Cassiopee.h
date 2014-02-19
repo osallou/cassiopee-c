@@ -6,6 +6,13 @@
 
 #include "CassiopeeConfig.h"
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+// Provide an implementation of serialize for std::list
+#include <boost/serialization/list.hpp>
+
 using namespace std;
 
 
@@ -98,15 +105,25 @@ public:
 
 
 private:
-
+	  friend class boost::serialization::access;
+	  template<class Archive>
+	  void serialize(Archive & ar, const unsigned int /*version*/)
+	  {
+	    ar & c;
+	    ar & next_pos;
+	    ar & next_length;
+	    ar & positions;
+	  }
 
 };
 
+
+
 #ifndef __CASSIOPEE_H_
 #define __CASSIOPEE_H_
-inline std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
-  return strm << "TreeNode(" << a.c << ")";
-}
+//inline std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
+//  return strm << "TreeNode(" << a.c << ")";
+//}
 #endif
 
 
@@ -118,6 +135,7 @@ inline std::ostream& operator<<(std::ostream &strm, const TreeNode &a) {
 class CassieIndexer {
 public:
 
+
 	/**
 	 * Main contructor
 	 *
@@ -126,6 +144,17 @@ public:
 	CassieIndexer(char* path);
 
 	~CassieIndexer();
+
+	/**
+	 * Save the index in a file
+	 */
+	void save();
+
+	/**
+	 * Load index from a file
+	 */
+	void load();
+
 
 	/**
 	 * Generates a dot file representing the tree.
@@ -187,6 +216,9 @@ public:
 	long seq_length;
 
 private:
+	list<TreeNode> serialized_nodes;
+
+
 
 	char* filename;
 	ifstream seqstream;

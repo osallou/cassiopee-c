@@ -9,6 +9,7 @@ using namespace std;
 
 void showUsage() {
 	 fprintf(stdout,"Usage:\n");
+	 fprintf(stdout,"\t-u: save index for later use\n");
 	 fprintf(stdout,"\t-s: sequence to index\n");
 	 fprintf(stdout,"\t-p: pattern to search\n");
      fprintf(stdout,"\t-f: file containing pattern to search\n");
@@ -65,9 +66,14 @@ int main (int argc, char *argv[])
 
   int format = 0;
 
-  while ((c = getopt (argc, argv, "d:ge:i:marhvs:p:n:o:f:x:y:")) != -1)
+  bool save = false;
+
+  while ((c = getopt (argc, argv, "ud:ge:i:marhvs:p:n:o:f:x:y:")) != -1)
       switch (c)
       {
+      	 case 'u':
+    	  	 save = true;
+    	  	 break;
          case 's':
            sequence = strdup(optarg);
            break;
@@ -165,6 +171,9 @@ int main (int argc, char *argv[])
   }
   indexer->max_depth = max_graph;
   indexer->index();
+  if(save) {
+	  indexer->save();
+  }
   if(graph) {
 	  indexer->graph(max_graph);
   }
