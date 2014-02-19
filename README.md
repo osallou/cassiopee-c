@@ -5,7 +5,7 @@ Cassiopee index and search library C implementation
 
 Expected input sequence is a one-line sequence with no header. CassiopeeKnife  (see later chapter) can be used to convert Fasta sequences in cassiopee input sequences.
 
-Dependencies
+Compilation dependencies
 ===========
 
 cppunit
@@ -13,6 +13,15 @@ cppunit
 Google log (glog)
 
 tree.hh (included)
+
+libboost-serialization-dev,libboost-iostreams-dev
+
+Runtime dependencies
+===================
+
+Google log (glog)
+
+libboost-serialization,libboost-iostreams
 
 Compilation
 ===========

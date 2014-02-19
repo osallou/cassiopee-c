@@ -18,6 +18,14 @@ set (PROJECT_BINARY_DIR bin)
 set (PROJECT_DOC_DIR doc)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+#add_definitions( -DBOOST_ALL_NO_LIB )
+unset(Boost_INCLUDE_DIR CACHE)
+unset(Boost_LIBRARY_DIRS CACHE)
+set(Boost_USE_STATIC_LIBS   OFF)
+
+find_package(Boost REQUIRED COMPONENTS iostreams serialization)
+
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -50,6 +58,7 @@ configure_file (
 # add the binary tree to the search path for include files
 # so that we will find CassiopeeConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
+include_directories(${Boost_INCLUDE_DIR})
 
 add_subdirectory (src)
 add_subdirectory (test)
