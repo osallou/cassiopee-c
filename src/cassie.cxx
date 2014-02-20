@@ -157,7 +157,7 @@ int main (int argc, char *argv[])
 	  return 1;
   }
 
-  FLAGS_logtostderr = 1;
+  //FLAGS_logtostderr = 1;
 
   google::InitGoogleLogging(sequence);
   //google::SetLogDestination(google::GLOG_INFO,string(dirname(sequence)).c_str() );
