@@ -13,6 +13,7 @@ void showUsage() {
 	 fprintf(stdout,"\t-s: sequence to index\n");
 	 fprintf(stdout,"\t-p: pattern to search\n");
      fprintf(stdout,"\t-f: file containing pattern to search\n");
+     fprintf(stdout,"\t-o: output file\n");
      fprintf(stdout,"\t-r: apply tree reduction\n");
      fprintf(stdout,"\t-m: search mode: 0=DNA, 1=RNA, 2=Protein\n");
      fprintf(stdout,"\t-a: allow alphabet ambiguity search\n");
@@ -21,7 +22,7 @@ void showUsage() {
      fprintf(stdout,"\t-i: max indel allowed matches in search\n");
      fprintf(stdout,"\t-g: generates a dot file of the graph\n");
      fprintf(stdout,"\t-d: max depth of the graph\n");
-     fprintf(stdout,"\t-o: output format: 0:tsv (default), 1:json\n");
+     fprintf(stdout,"\t-t: output format: 0:tsv (default), 1:json\n");
      fprintf(stdout,"\t-x: minimum position in sequence\n");
      fprintf(stdout,"\t-y: maximum position in sequence\n");
 	 fprintf(stdout,"\t-v: show version\n");
@@ -66,9 +67,11 @@ int main (int argc, char *argv[])
 
   int format = 0;
 
+  string out_file_name;
+
   bool save = false;
 
-  while ((c = getopt (argc, argv, "ud:ge:i:marhvs:p:n:o:f:x:y:")) != -1)
+  while ((c = getopt (argc, argv, "ud:ge:i:marhvs:p:n:t:o:f:x:y:")) != -1)
       switch (c)
       {
       	 case 'u':
@@ -80,6 +83,9 @@ int main (int argc, char *argv[])
          case 'p':
            pattern = string(optarg);
            is_pattern = true;
+           break;
+         case 'o':
+           out_file_name = string(optarg);
            break;
          case 'f':
            pattern_file = strdup(optarg);
@@ -100,7 +106,6 @@ int main (int argc, char *argv[])
          case 'y':
              max = atol(optarg);
              break;
-
          case 'r':
         	 reduction = true;
         	 break;
@@ -110,7 +115,7 @@ int main (int argc, char *argv[])
          case 'n':
         	 nmax = atoi(optarg);
         	 break;
-         case 'o':
+         case 't':
            format = atoi(optarg);
            break;
          case 'e':
@@ -145,8 +150,16 @@ int main (int argc, char *argv[])
 	  return 1;
   }
 
-  const char logfile[] = "cassiopee.log";
-  google::InitGoogleLogging(logfile);
+  if(out_file_name.size()==0) {
+      fprintf (stderr,
+               "Output file name specified in command line.\n");
+	  return 1;
+  }
+
+  //const char logfile[] = "cassiopee.log";
+  google::InitGoogleLogging((sequence+string(".cass.log")).c_str());
+  google::SetLogDestination(google::GLOG_INFO,string(basename (sequence)).c_str() );
+
 
 
   if(pattern_file!=NULL) {
@@ -202,12 +215,16 @@ int main (int argc, char *argv[])
   }
   list<Match*> matches = searcher->matches;
 
+  ofstream out_file;
+  out_file.open (out_file_name.c_str());
+
   char* match_str;
   int p_length = 0;
   bool is_first = true;
   if(format==1) {
-    cout << "[";
+    out_file << "[";
   }
+
   for (std::list<Match*>::iterator it = matches.begin(); it != matches.end(); it++) {
       if((*it)->pos < min || (max>0 && (*it)->pos > max)) {
           continue;
@@ -225,25 +242,27 @@ int main (int argc, char *argv[])
 	  match_str[p_length] = '\0';
 	  DLOG(INFO) << " => " << string(match_str);
     if(format == 0) {
-        cout << (*it)->pos << "\t" << p_length << "\t" <<  (*it)->subst << "\t" << (*it)->in+(*it)->del << "\t" << (*it)->in << "\t" << (*it)->del << "\n";
+    	out_file << (*it)->pos << "\t" << p_length << "\t" <<  (*it)->subst << "\t" << (*it)->in+(*it)->del << "\t" << (*it)->in << "\t" << (*it)->del << "\n";
     }
     else {
         if(is_first) {
           is_first = false;
         }
-        else { cout << ","; }
-        cout << "{\"position\": " << (*it)->pos << ",";
-        cout << " \"length\": " << p_length << ",";
-        cout << " \"substitution\": " <<  (*it)->subst << ",";
-        cout << " \"indel\": " << (*it)->in+(*it)->del << ",";
-        cout << " \"in\": " << (*it)->in << ",";
-        cout << " \"del\": " << (*it)->del << "}";
+        else { out_file << ","; }
+        out_file << "{\"position\": " << (*it)->pos << ",";
+        out_file << " \"length\": " << p_length << ",";
+        out_file << " \"substitution\": " <<  (*it)->subst << ",";
+        out_file << " \"indel\": " << (*it)->in+(*it)->del << ",";
+        out_file << " \"in\": " << (*it)->in << ",";
+        out_file << " \"del\": " << (*it)->del << "}";
     }
 	  delete[] match_str;
 	  seqstream.close();
   }
 
-  if(format==1) { cout << "]\n"; }
+  if(format==1) { out_file << "]\n"; }
+
+  out_file.close();
 
   delete searcher;
   delete indexer;
