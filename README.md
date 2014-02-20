@@ -86,5 +86,3 @@ with no header).
 
 TODO
 ====
-
-* Save and load indexed sequence
