@@ -134,7 +134,7 @@ int main (int argc, char *argv[])
            if (optopt == 's' || optopt == 'p')
              fprintf (stderr, "Option requires an argument.\n");
            else if (isprint (optopt))
-             fprintf (stderr, "Unknown option `-%s'.\n", (char*)optopt);
+             fprintf (stderr, "Unknown option `-%c'.\n", optopt);
            else
              fprintf (stderr,
                       "Unknown option character `\\x%x'.\n",
