@@ -28,3 +28,4 @@ Testing
 cppunit-report.xml
 cassiopee.dot
 *.png
+test/sequence.txt.cass.idx

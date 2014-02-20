@@ -561,24 +561,26 @@ void CassieIndexer::save() {
 
 	tree<TreeNode>::iterator node = this->tr.begin();
 	tree<TreeNode>::iterator end = this->tr.end();
+	int depth;
 	while(node!=end) {
+		depth = tr.depth(node);
         // write class instance to archive
 		TreeNode ar_node = node.node->data;
         this->serialized_nodes.push_back(ar_node);
-        if(node.number_of_children()==0) {
-        	// This is a leaf, so add a termination endpoint
-        	TreeNode end_node = TreeNode('0');
-        	this->serialized_nodes.push_back(end_node);
-        }
-        tree<TreeNode>::iterator sibling = tr.next_sibling(node);
-        if(sibling.node == 0) {
-        	// This was last sibling, add a termination endpoint
-        	TreeNode end_node = TreeNode('0');
-        	this->serialized_nodes.push_back(end_node);
-        }
+
+
 		++node;
+		// If we go up, we have finished this level
+		if(tr.depth(node) <= depth ) {
+			for(int i = tr.depth(node);i <= depth; i++){
+
+				TreeNode end_node = TreeNode('0');
+				this->serialized_nodes.push_back(end_node);
+			}
+		}
 	}
-	DLOG(INFO) << "Number of nodes: " << this->serialized_nodes.size();
+
+	//DLOG(INFO) << "Number of nodes: " << this->serialized_nodes.size();
 
 	string index_file = string(this->filename)+".cass.idx";
 	ofstream ofs(index_file.c_str());
@@ -591,7 +593,6 @@ void CassieIndexer::save() {
 
 
 void CassieIndexer::load() {
-	cerr << "Load Not yet implemented" << endl;
     // create and open an archive for input
 	string index_file = string(this->filename)+".cass.idx";
     ifstream ifs(index_file.c_str());
@@ -600,22 +601,30 @@ void CassieIndexer::load() {
 
 	tree<TreeNode>::iterator sib;
 	sib = this->tr.begin();
+	int depth = 0;
 
     ia >> this->serialized_nodes;
     for (std::list<TreeNode>::const_iterator iterator = this->serialized_nodes.begin(), end = this->serialized_nodes.end(); iterator != end; ++iterator) {
-    	cout << "new node";
     	if(iterator->c != '0') {
-    		cout << "append child";
-    		sib = this->tr.append_child(sib, *iterator);
+    		if(depth==0) {
+    			//cout << "insert child";
+    			sib = this->tr.insert(this->tr.begin(), *iterator);
+    		}
+    		else {
+    			//cout << "append child";
+    			sib = this->tr.append_child(sib, *iterator);
+    		}
+    		depth++;
     	}
     	else {
+    		depth--;
     		// Should be back to parent
     		sib = sib.node->parent;
     	}
     }
     this->serialized_nodes.clear();
 
-    cout << this->getTree()->size();
+    DLOG(INFO) << "Loaded " << this->getTree()->size() << " nodes";
 
     // archive and stream closed when destructors are called
 }
