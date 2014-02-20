@@ -71,7 +71,7 @@ int main (int argc, char *argv[])
 
   bool save = false;
 
-  while ((c = getopt (argc, argv, "ud:ge:i:marhvs:p:n:t:o:f:x:y:")) != -1)
+  while ((c = getopt (argc, argv, "ud:ge:i:m:arhvs:p:n:t:o:f:x:y:")) != -1)
       switch (c)
       {
       	 case 'u':
@@ -230,7 +230,7 @@ int main (int argc, char *argv[])
           continue;
       }
       p_length = pattern.length();
-	  DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
+	  //DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
 	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
 	  seqstream.seekg((*it)->pos, seqstream.beg);
@@ -240,7 +240,7 @@ int main (int argc, char *argv[])
 	  }
 	  seqstream.read(match_str, p_length + 1);
 	  match_str[p_length] = '\0';
-	  DLOG(INFO) << " => " << string(match_str);
+	  //DLOG(INFO) << " => " << string(match_str);
     if(format == 0) {
     	out_file << (*it)->pos << "\t" << p_length << "\t" <<  (*it)->subst << "\t" << (*it)->in+(*it)->del << "\t" << (*it)->in << "\t" << (*it)->del << "\n";
     }
