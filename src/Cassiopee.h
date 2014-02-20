@@ -215,10 +215,15 @@ public:
 
 	long seq_length;
 
+	/**
+	 * Checks if index has been loaded from a saved index or if index has been build dynamically
+	 */
+	bool index_loaded_from_file();
+
 private:
 	list<TreeNode> serialized_nodes;
 
-
+	bool loaded_from_file;
 
 	char* filename;
 	ifstream seqstream;

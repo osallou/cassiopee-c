@@ -320,12 +320,34 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 
 		    //LOG(INFO) << *sib << "," << *last_sibling;
 			//LOG(INFO) << "compare " << suffix_char << " with " << tree_char  << ", " << counter << "," << tr->depth(sib);
-
 			bool isequal = this->isequal(tree_char,suffix_char);
+
+			tree<TreeNode>::iterator next_sibling = sib;
+			while(this->mode!=2) {
+				next_sibling = tr->next_sibling(next_sibling);
+
+				if(next_sibling.node == 0) {
+					break;
+				}
+
+				// If DNA/RNA and tree matches a N, check on max consecutive N allowed
+				char next_tree_char = next_sibling->c;
+				if(next_tree_char == 'n') {
+					if(this->nmax>0 && nbN < this->nmax) {
+						if(counter == suffix.length()-1) {
+							// Last character, allow it
+							this->getMatchesFromNode(next_sibling, nbSubst, nbIn, nbDel);
+						}
+						else {
+							// Allow substitutions, so try child
+							this->searchAtNode(suffix, counter+1, next_sibling, nbSubst, nbIn, nbDel, nbN+1);
+						}
+					}
+				}
+			}
 			if(!isequal) {
 				// If DNA/RNA and tree matches a N, check on max consecutive N allowed
 				if(this->mode!=2 && tree_char == 'n') {
-
 					if(this->nmax>0 && nbN < this->nmax) {
 						if(counter == suffix.length()-1) {
 							// Last character, allow it
@@ -419,7 +441,7 @@ CassieIndexer::~CassieIndexer() {
 	delete[] this->suffix;
 }
 
-CassieIndexer::CassieIndexer(char* path): max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
+CassieIndexer::CassieIndexer(char* path): loaded_from_file(false),max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
 {
 
     // If we couldn't open the input file stream for reading
@@ -535,6 +557,7 @@ void CassieIndexer::index() {
 	{
 	     LOG(INFO) << "Index file exists, loading it" << std::endl;
 	     this->load();
+	     this->loaded_from_file = true;
 	     return;
 	}
 
@@ -550,6 +573,10 @@ void CassieIndexer::index() {
 		this->filltree(i);
 	}
 
+}
+
+bool CassieIndexer::index_loaded_from_file() {
+	return this->loaded_from_file;
 }
 
 

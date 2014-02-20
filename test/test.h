@@ -13,6 +13,8 @@ class CassiopeeTest : public CppUnit::TestFixture
   CPPUNIT_TEST( testSearchWithN );
   CPPUNIT_TEST( testReducedSearchAfterN );
   CPPUNIT_TEST( testReducedSearchWithN );
+  CPPUNIT_TEST( testProtein );
+  CPPUNIT_TEST( testLoadSave );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -28,5 +30,7 @@ public:
   void testSearchWithN();
   void testReducedSearchAfterN();
   void testReducedSearchWithN();
+  void testProtein();
+  void testLoadSave();
 
 };

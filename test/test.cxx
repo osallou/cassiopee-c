@@ -62,6 +62,31 @@ void CassiopeeTest::testIndex()
 	  delete indexer;
 }
 
+void CassiopeeTest::testLoadSave()
+{
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->index();
+	  long save_nodes = indexer->getTree()->size();
+	  indexer->save();
+	  delete indexer;
+
+	  CassieIndexer* indexer2 = new CassieIndexer(seq);
+	  indexer->index();
+	  if(! indexer2->index_loaded_from_file()) {
+		  CPPUNIT_FAIL( "index not loaded from saved index" );
+	  }
+	  long load_nodes = indexer->getTree()->size();
+	  delete indexer2;
+
+
+	  if(load_nodes != save_nodes) {
+		  CPPUNIT_FAIL( "loaded tree is different from saved tree" );
+	  }
+
+}
+
 void CassiopeeTest::testIndexWithReduction()
 {
 	  char sequence[] = "test/sequence.txt";
@@ -116,6 +141,29 @@ void CassiopeeTest::testSearchInReduction()
 	  delete searcher;
 	  delete indexer;
 }
+
+void CassiopeeTest::testProtein()
+{
+	  char sequence[] = "test/protein.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->do_reduction = true;
+	  indexer->index();
+
+	  CassieSearch* searcher = new CassieSearch(indexer);
+	  searcher->mode = 2;
+	  searcher->search("GHIKLMNPQR");
+	  searcher->sort();
+	  list<Match*> matches = searcher->matches;
+
+	  if(matches.size()!=1) {
+		  CPPUNIT_FAIL( "wrong number of match" );
+	  }
+
+	  delete searcher;
+	  delete indexer;
+}
+
 
 void CassiopeeTest::testSearchWithError()
 {

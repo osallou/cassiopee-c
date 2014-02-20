@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <glog/logging.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #include "Cassiopee.h"
 
@@ -156,11 +157,10 @@ int main (int argc, char *argv[])
 	  return 1;
   }
 
-  //const char logfile[] = "cassiopee.log";
-  google::InitGoogleLogging((sequence+string(".cass.log")).c_str());
-  google::SetLogDestination(google::GLOG_INFO,string(basename (sequence)).c_str() );
+  FLAGS_logtostderr = 1;
 
-
+  google::InitGoogleLogging(sequence);
+  //google::SetLogDestination(google::GLOG_INFO,string(dirname(sequence)).c_str() );
 
   if(pattern_file!=NULL) {
     ifstream pfile(pattern_file);
@@ -175,8 +175,6 @@ int main (int argc, char *argv[])
       pfile.close();
     }
   }
-
-  //FLAGS_logtostderr = 1;
 
   CassieIndexer* indexer = new CassieIndexer(sequence);
   if(reduction) {
@@ -230,7 +228,7 @@ int main (int argc, char *argv[])
           continue;
       }
       p_length = pattern.length();
-	  //DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
+	  DLOG(INFO) << "Match at: " << (*it)->pos << ", errors: " << (*it)->subst << "," << (*it)->in << "," << (*it)->del;
 	  // For debug
 	  ifstream seqstream (sequence, ios_base::in | ios_base::binary);
 	  seqstream.seekg((*it)->pos, seqstream.beg);
