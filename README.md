@@ -20,20 +20,19 @@ Expected input sequence is a one-line sequence with no header. CassiopeeKnife  (
 Compilation dependencies
 ===========
 
-cppunit
-
-Google log (glog)
-
-tree.hh (included)
-
-libboost-serialization-dev,libboost-iostreams-dev
+* cppunit
+* Google log (glog)
+* tree.hh (included):
+  - Author: kasper.peeters (at) phi-sci.com
+  - http://tree.phi-sci.com/ under GNU GPL
+* libboost-serialization-dev,libboost-iostreams-dev
 
 Runtime dependencies
 ===================
 
-Google log (glog)
+* Google log (glog)
 
-libboost-serialization,libboost-iostreams
+* libboost-serialization, libboost-iostreams
 
 Compilation
 ===========
