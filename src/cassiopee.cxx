@@ -442,7 +442,7 @@ CassieIndexer::~CassieIndexer() {
 	delete[] this->suffix;
 }
 
-CassieIndexer::CassieIndexer(char* path): loaded_from_file(false),max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
+CassieIndexer::CassieIndexer(const char* path): loaded_from_file(false),max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
 {
 
     // If we couldn't open the input file stream for reading

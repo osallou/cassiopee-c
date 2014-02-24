@@ -141,7 +141,7 @@ public:
 	 *
 	 * \param path Path to the sequence file, sequence must be a one-line sequence.
 	 */
-	CassieIndexer(char* path);
+	CassieIndexer(const char* path);
 
 	~CassieIndexer();
 
@@ -225,7 +225,7 @@ private:
 
 	bool loaded_from_file;
 
-	char* filename;
+	const char* filename;
 	ifstream seqstream;
 	tree<TreeNode> tr;
 
