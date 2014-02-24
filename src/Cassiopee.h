@@ -400,7 +400,7 @@ public:
 	 */
 	int max_subst;
 
-
+    long pattern_length;
 
 	/**
 	 * Sort matches according to positions i nascending order
