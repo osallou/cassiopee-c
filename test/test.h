@@ -15,6 +15,7 @@ class CassiopeeTest : public CppUnit::TestFixture
   CPPUNIT_TEST( testReducedSearchWithN );
   CPPUNIT_TEST( testProtein );
   CPPUNIT_TEST( testLoadSave );
+  CPPUNIT_TEST( testMultiIndex );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -32,5 +33,6 @@ public:
   void testReducedSearchWithN();
   void testProtein();
   void testLoadSave();
+  void testMultiIndex();
 
 };

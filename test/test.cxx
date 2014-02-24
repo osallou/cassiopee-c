@@ -90,6 +90,31 @@ void CassiopeeTest::testLoadSave()
 
 }
 
+void CassiopeeTest::testMultiIndex()
+{
+      // If index saved file exists, delete it
+      if( remove( "test/sequence.txt.cass.idx" ) != 0 ) {
+          cerr <<  "Error deleting index file"  << endl;
+      }
+	  char sequence[] = "test/sequence.txt";
+	  char* seq = sequence;
+	  CassieIndexer* indexer = new CassieIndexer(seq);
+	  indexer->index();
+	  long save_nodes = indexer->getTree()->size();
+	  indexer->save();
+	  indexer->index();
+	  long save_nodes2 = indexer->getTree()->size();
+
+	  if(save_nodes != save_nodes2) {
+		  CPPUNIT_FAIL( "index loaded twice" );
+	  }
+
+	  delete indexer;
+
+
+
+}
+
 void CassiopeeTest::testIndexWithReduction()
 {
 	  char sequence[] = "test/sequence.txt";

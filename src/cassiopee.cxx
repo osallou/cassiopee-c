@@ -628,6 +628,7 @@ void CassieIndexer::load() {
 
 
 	tree<TreeNode>::iterator sib;
+	this->tr.clear();
 	sib = this->tr.begin();
 	int depth = 0;
 
