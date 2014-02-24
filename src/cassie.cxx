@@ -191,6 +191,7 @@ int main (int argc, char *argv[])
   DLOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);
+  searcher->mode = mode;
   // Allow 1 substitution for test
   searcher->max_subst = max_subst;
   searcher->max_indel = max_indel;
