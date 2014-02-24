@@ -86,7 +86,7 @@ bool Ambiguous::isequal(char a, char b) {
 	return false;
 }
 
-CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref), ambiguity(false), nmax(0), mode(0), max_subst(0), max_indel(0) {
+CassieSearch::CassieSearch(CassieIndexer* index_ref): indexer(index_ref), ambiguity(false), nmax(0), mode(0), max_subst(0), max_indel(0), pattern_length(0) {
 	match_limits = new Match();
 }
 
@@ -168,6 +168,7 @@ void CassieSearch::search(string suffixes[]) {
 }
 
 void CassieSearch::search(string suffix) {
+    this->pattern_length =  suffix.length();
 	this->search(suffix,true);
 }
 
