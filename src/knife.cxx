@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "CassiopeeConfig.h"
+#include "Cassiopee.h"
 
 
 using namespace std;
@@ -36,17 +37,17 @@ int main (int argc, char *argv[])
 
 
   int c;
-  char* sequence=NULL;
-  char* out=NULL;
+  string sequence="";
+  string out="";
 
   while ((c = getopt (argc, argv, "s:o:vh")) != -1)
       switch (c)
       {
          case 's':
-           sequence = strdup(optarg);
+           sequence = string(optarg);
            break;
          case 'o':
-           out = strdup(optarg);
+           out = string(optarg);
            break;
          case 'h':
         	 showUsage();
@@ -58,7 +59,7 @@ int main (int argc, char *argv[])
            abort ();
       }
 
-  if(sequence==NULL||out==NULL) {
+  if(sequence.empty()||out.empty()) {
       fprintf (stderr,
                "Sequence file or output file not specified in command line.\n");
 	  return 1;
@@ -66,26 +67,8 @@ int main (int argc, char *argv[])
 
 
 
-  ifstream input( sequence );
-  ofstream out_file ( out );
-  bool first_seq = true;
-  for( string line; getline( input, line ); )
-  {
-    // Skip lines starting with '>'
-    if(line[0] == '>') { 
-        if(first_seq) {
-            continue;
-        }
-        else {
-            break;
-        }
-    }
-    first_seq = false;
-    // write other lines
-    transform(line.begin(), line.end(), line.begin(), ::tolower);
-    out_file << line;
-  }
-  out_file.close();
+  CassiopeeUtils::transform_fasta(sequence, out);
+
 
   return 0;
 }

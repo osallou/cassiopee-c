@@ -2,11 +2,39 @@
 #include <stdio.h>
 #include <glog/logging.h>
 #include <unistd.h>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
 
 #include "Cassiopee.h"
 
 using namespace std;
 
+
+
+
+void CassiopeeUtils::transform_fasta(const string in, const string out) {
+	  ifstream input( in.c_str() );
+	  ofstream out_file ( out.c_str() );
+	  bool first_seq = true;
+	  for( string line; getline( input, line ); )
+	  {
+	    // Skip lines starting with '>'
+	    if(line[0] == '>') {
+	        if(first_seq) {
+	            continue;
+	        }
+	        else {
+	            break;
+	        }
+	    }
+	    first_seq = false;
+	    // write other lines
+	    transform(line.begin(), line.end(), line.begin(), ::tolower);
+	    out_file << line;
+	  }
+	  out_file.close();
+}
 
 Match::Match(): in(0),del(0), subst(0), pos(-1) {
 

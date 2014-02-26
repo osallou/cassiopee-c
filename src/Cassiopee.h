@@ -265,6 +265,18 @@ private:
 
 };
 
+
+/**
+ * Utility functions
+ */
+class CassiopeeUtils {
+public:
+	/**
+	 * Transform a Fasta input sequence in a sequence manageable by index.
+	 */
+	static void transform_fasta(const string in, const string out);
+};
+
 /**
  * Ambiguity character matches for DNA
  */

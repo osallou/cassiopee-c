@@ -6,6 +6,7 @@ add_executable(CassiopeeKnife knife.cxx)
 
 target_link_libraries(Cassie glog ${Boost_LIBRARIES} )
 target_link_libraries(Cassiopee Cassie glog ${Boost_LIBRARIES} )
+target_link_libraries(CassiopeeKnife Cassie glog ${Boost_LIBRARIES} )
 
 # add the install targets
 install (TARGETS Cassiopee DESTINATION bin)
