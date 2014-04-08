@@ -14,8 +14,10 @@ set (Cassiopee_VERSION_MAJOR 1)
 set (Cassiopee_VERSION_MINOR 0)
 
 set (PROJECT_SOURCE_DIR src)
-set (PROJECT_BINARY_DIR bin)
+set (PROJECT_BINARY_DIR ${CMAKE_BINARY_DIR}/bin)
 set (PROJECT_DOC_DIR doc)
+
+enable_testing()
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
