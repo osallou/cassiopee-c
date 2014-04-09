@@ -84,5 +84,14 @@ Convert an input Fasta sequence in a cassiopee input format (one line sequence
 with no header).
 
 
+
 TODO
 ====
+
+
+COPYRIGHT
+========
+
+See license file.
+
+Code under src/tree from http://tree.phi-sci.com/, copyright kasper.peeters@phi-sci.com
