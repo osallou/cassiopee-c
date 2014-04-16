@@ -20,11 +20,13 @@ CPPUNIT_TEST_SUITE_REGISTRATION( CassiopeeTest );
 
 void CassiopeeTest::setUp()
 {
+  remove( "test/sequence.txt.cass.idx" );
 }
 
 
 void CassiopeeTest::tearDown()
 {
+  remove( "test/sequence.txt.cass.idx" );
 }
 
 
@@ -64,23 +66,19 @@ void CassiopeeTest::testIndex()
 
 void CassiopeeTest::testLoadSave()
 {
-      // If index saved file exists, delete it
-      if( remove( "test/sequence.txt.cass.idx" ) != 0 ) {
-          cerr <<  "Error deleting index file"  << endl;
-      }
 	  char sequence[] = "test/sequence.txt";
 	  char* seq = sequence;
 	  CassieIndexer* indexer = new CassieIndexer(seq);
 	  indexer->index();
 	  long save_nodes = indexer->getTree()->size();
 	  indexer->save();
-	  delete indexer;
 	  CassieIndexer* indexer2 = new CassieIndexer(seq);
 	  indexer2->index();
 	  if(! indexer2->index_loaded_from_file()) {
 		  CPPUNIT_FAIL( "index not loaded from saved index" );
 	  }
 	  long load_nodes = indexer->getTree()->size();
+      delete indexer;
 	  delete indexer2;
 
 
@@ -92,10 +90,6 @@ void CassiopeeTest::testLoadSave()
 
 void CassiopeeTest::testMultiIndex()
 {
-      // If index saved file exists, delete it
-      if( remove( "test/sequence.txt.cass.idx" ) != 0 ) {
-          cerr <<  "Error deleting index file"  << endl;
-      }
 	  char sequence[] = "test/sequence.txt";
 	  char* seq = sequence;
 	  CassieIndexer* indexer = new CassieIndexer(seq);
