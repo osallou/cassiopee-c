@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Cassiopee-c by osallou</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Cassiopee-c</h1>
+        <h2>Cassiopee index and search library C implementation</h2>
+        <a href="https://github.com/osallou/cassiopee-c" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="cassiopee-c" class="anchor" href="#cassiopee-c"><span class="octicon octicon-link"></span></a>cassiopee-c</h1>
+
+<p>Cassiopee is an index and search tool and library for bioinformatics (could be used for others but provides additional stuff usefull in sequence analysis).
+It is a complete rewrite of the ruby Cassiopee gem.
+It scan an input genomic sequence (dna/rna/protein) and search for a
+subsequence with exact match or allowing substitutions (Hamming distance)
+and/or insertion/deletions. It also support alphabet ambiguity.</p>
+
+<p>This program provides both a binary (Cassiopee) and a shared library.</p>
+
+<p>Index is based on a suffix tree with compression. It is possible to save the
+indexed sequence for later use without the need to reindex the whole sequence
+(for large data sets).</p>
+
+<p>See cassiopee -h for all options.</p>
+
+<p>Expected input sequence is a one-line sequence with no header. cassiopeeknife  (see later chapter) can be used to convert Fasta sequences in cassiopee input sequences.</p>
+
+<h1>
+<a name="packages" class="anchor" href="#packages"><span class="octicon octicon-link"></span></a>Packages</h1>
+
+<p>Application is packaged for several distribution.
+It is available in official Debian repository (<em>unstable</em> for the moment, <em>Jessie</em> soon).
+You can look at status at: <a href="https://packages.debian.org/search?lang=fr&amp;searchon=names&amp;keywords=cassiopee">https://packages.debian.org/search?lang=fr&amp;searchon=names&amp;keywords=cassiopee</a></p>
+
+<p>For rpm (Fedora, CentOS, OpenSuse): <a href="https://build.opensuse.org/package/show/home:osallou:logol/cassiopee-c">https://build.opensuse.org/package/show/home:osallou:logol/cassiopee-c</a></p>
+
+<h1>
+<a name="compilation-dependencies" class="anchor" href="#compilation-dependencies"><span class="octicon octicon-link"></span></a>Compilation dependencies</h1>
+
+<ul>
+<li>cppunit</li>
+<li>Google log (glog)</li>
+<li>tree.hh (included):
+
+<ul>
+<li>Author: kasper.peeters (at) phi-sci.com</li>
+<li>
+<a href="http://tree.phi-sci.com/">http://tree.phi-sci.com/</a> under GNU GPL</li>
+</ul>
+</li>
+<li>libboost-serialization-dev,libboost-iostreams-dev</li>
+</ul><h1>
+<a name="runtime-dependencies" class="anchor" href="#runtime-dependencies"><span class="octicon octicon-link"></span></a>Runtime dependencies</h1>
+
+<ul>
+<li><p>Google log (glog)</p></li>
+<li><p>libboost-serialization, libboost-iostreams</p></li>
+</ul><h1>
+<a name="compilation" class="anchor" href="#compilation"><span class="octicon octicon-link"></span></a>Compilation</h1>
+
+<pre><code>cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Debug .
+make
+</code></pre>
+
+<h1>
+<a name="valgrind" class="anchor" href="#valgrind"><span class="octicon octicon-link"></span></a>Valgrind</h1>
+
+<pre><code>valgrind --leak-check=full bin/Cassiopee  -s test/sequence.txt -p ggc
+</code></pre>
+
+<h1>
+<a name="static-analysis" class="anchor" href="#static-analysis"><span class="octicon octicon-link"></span></a>Static analysis</h1>
+
+<pre><code>CXX=/usr/share/clang/scan-build/c++-analyzer cmake .
+</code></pre>
+
+<h1>
+<a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h1>
+
+<pre><code>bin/test_cassiopee
+</code></pre>
+
+<p>or </p>
+
+<pre><code>cd test; ctest -V
+</code></pre>
+
+<h1>
+<a name="tree-graph-generation" class="anchor" href="#tree-graph-generation"><span class="octicon octicon-link"></span></a>Tree graph generation</h1>
+
+<p>API provides the graph method to generate a cassiopee.dot file.
+To generate the image from the file:</p>
+
+<pre><code>dot -Tpng cassiopee.dot &gt; cassiopee.png
+</code></pre>
+
+<h1>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h1>
+
+<p>doxygen bin/Doxyfile</p>
+
+<h1>
+<a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>BUGS</h1>
+
+<h1>
+<a name="cassiopeeknife" class="anchor" href="#cassiopeeknife"><span class="octicon octicon-link"></span></a>CassiopeeKnife</h1>
+
+<p>Convert an input Fasta sequence in a cassiopee input format (one line sequence
+with no header).</p>
+
+<h1>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
+
+<h1>
+<a name="copyright" class="anchor" href="#copyright"><span class="octicon octicon-link"></span></a>COPYRIGHT</h1>
+
+<p>See license file.</p>
+
+<p>Code under src/tree from <a href="http://tree.phi-sci.com/">http://tree.phi-sci.com/</a>, copyright <a href="mailto:kasper.peeters@phi-sci.com">kasper.peeters@phi-sci.com</a></p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/osallou/cassiopee-c/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/osallou/cassiopee-c/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/osallou/cassiopee-c"></a> is maintained by <a href="https://github.com/osallou">osallou</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
