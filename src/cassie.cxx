@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <algorithm>
 
 #include "Cassiopee.h"
 
@@ -10,6 +11,7 @@ using namespace std;
 
 void showUsage() {
 	 fprintf(stdout,"Usage:\n");
+     fprintf(stdout,"\t-l: maximum index depth / max pattern size\n");
 	 fprintf(stdout,"\t-u: save index for later use\n");
 	 fprintf(stdout,"\t-s: sequence to index\n");
 	 fprintf(stdout,"\t-p: pattern to search\n");
@@ -63,6 +65,8 @@ int main (int argc, char *argv[])
   int min = 0;
   int max = -1;
 
+  long max_index_depth = 0;
+
   bool graph = false;
   long max_graph = 0;
 
@@ -72,9 +76,11 @@ int main (int argc, char *argv[])
 
   bool save = false;
 
-  while ((c = getopt (argc, argv, "ud:ge:i:m:arhvs:p:n:t:o:f:x:y:")) != -1)
+  while ((c = getopt (argc, argv, "ud:ge:i:m:arhvs:p:n:t:o:f:x:y:l:")) != -1)
       switch (c)
       {
+         case 'l':
+             max_index_depth = atol(optarg);
       	 case 'u':
     	  	 save = true;
     	  	 break;
@@ -166,7 +172,7 @@ int main (int argc, char *argv[])
     ifstream pfile(pattern_file);
     if(pfile.is_open()) {
       // Read only first line
-      while( getline(pfile, pattern)) { 
+      while( getline(pfile, pattern)) {
          if(pattern.at(0)!='>') {
            DLOG(INFO) << "Search pattern " << pattern;
            break;
@@ -176,10 +182,16 @@ int main (int argc, char *argv[])
     }
   }
 
+
+  long max_pattern_size = std::max(max_index_depth, (long)(pattern.size()+max_indel));
+
   CassieIndexer* indexer = new CassieIndexer(sequence);
   if(reduction) {
 	  indexer->do_reduction = true;
   }
+
+  indexer->max_index_depth = max_pattern_size;
+
   indexer->max_depth = max_graph;
   indexer->index();
   if(save) {
@@ -268,4 +280,3 @@ int main (int argc, char *argv[])
 
   return 0;
 }
-

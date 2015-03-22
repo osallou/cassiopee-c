@@ -470,7 +470,7 @@ CassieIndexer::~CassieIndexer() {
 	delete[] this->suffix;
 }
 
-CassieIndexer::CassieIndexer(const char* path): loaded_from_file(false),max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL)
+CassieIndexer::CassieIndexer(const char* path): loaded_from_file(false),max_depth(0),do_reduction(false), filename(path), seqstream(path, ios_base::in | ios_base::binary), matches(), serialized_nodes(), MAX_SUFFIX(SUFFIX_CHUNK_SIZE),suffix_position(-1), suffix(NULL), max_index_depth(0)
 {
 
     // If we couldn't open the input file stream for reading
@@ -484,6 +484,10 @@ CassieIndexer::CassieIndexer(const char* path): loaded_from_file(false),max_dept
     this->seqstream.seekg (0, this->seqstream.end);
     this->seq_length = this->seqstream.tellg();
     this->seqstream.seekg (0, this->seqstream.beg);
+
+    if (this->max_index_depth == 0) {
+      this->max_index_depth = this->seq_length-1;
+    }
 }
 
 
@@ -581,14 +585,28 @@ long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstre
 
 void CassieIndexer::index() {
 
-	string index_file = string(this->filename)+".cass.idx";
-	if (ifstream(index_file.c_str()))
-	{
-	     LOG(INFO) << "Index file exists, loading it" << std::endl;
-	     this->load();
-	     this->loaded_from_file = true;
-	     return;
-	}
+    long max_depth = 0;
+	string index_meta_file = string(this->filename)+".cass.meta";
+	ifstream metafile (index_meta_file.c_str());
+    if (metafile.is_open()) {
+		string line;
+		getline(metafile, line);
+		max_depth = atol(line.c_str());
+    	metafile.close();
+   }
+   LOG(INFO) << "Existing index for max depth = "  << max_depth << std::endl;
+   if (max_depth >=  this->max_index_depth) {
+
+		string index_file = string(this->filename)+".cass.idx";
+		if (ifstream(index_file.c_str()))
+		{
+		     LOG(INFO) << "Index file exists, loading it" << std::endl;
+		     this->load();
+		     this->loaded_from_file = true;
+		     return;
+		}
+
+    }
 
 	if(!(this->tr).empty()) {
 		DLOG(INFO) << "Indexed already filled";
@@ -637,6 +655,12 @@ void CassieIndexer::save() {
 	}
 
 	//DLOG(INFO) << "Number of nodes: " << this->serialized_nodes.size();
+	LOG(INFO) << "Maximum index depth: " << this->max_index_depth << std::endl;
+    string index_meta_file = string(this->filename)+".cass.meta";
+	ofstream metafile;
+    metafile.open (index_meta_file.c_str());
+    metafile << this->max_index_depth;
+    metafile.close();
 
 	string index_file = string(this->filename)+".cass.idx";
 	ofstream ofs(index_file.c_str());
@@ -702,7 +726,9 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 	tree<TreeNode>::iterator sib;
 
 	char node_char = this->getCharAtSuffix(pos+suffix_pos);
-	long suffix_len = this->seq_length - (pos+suffix_pos) -1;
+	//long suffix_len = this->seq_length - (pos+suffix_pos) -1;
+    // OSALLOU
+    long suffix_len = min(this->max_index_depth, this->seq_length - (pos+suffix_pos) -1);
 
 	TreeNode* node = new TreeNode(node_char);
 
@@ -733,7 +759,9 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 
 
 void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos) {
-	long suffix_len = this->seq_length - pos -1 ;
+	//long suffix_len = this->seq_length - pos -1 ;
+    //OSALLOU
+    long suffix_len = min(this->max_index_depth, this->seq_length - pos -1);
 
 	for(long i=suffix_pos;i<suffix_len;i++) {
 		//char node_char = suffix[i];
@@ -776,14 +804,13 @@ tree<TreeNode>* CassieIndexer::getTree() {
 
 void CassieIndexer::filltree(long pos) {
 
-
-
-
 	tree<TreeNode>::iterator sib;
 	tree<TreeNode>::iterator last_sibling;
 	tree<TreeNode>::iterator place_to_insert;
 
-	long suffix_len = this->seq_length - pos - 1;
+	//long suffix_len = this->seq_length - pos - 1;
+    // OSALLOU
+    long suffix_len = min(this->max_index_depth, this->seq_length - pos - 1);
 
 
 	//LOG(INFO) << "new suffix " << pos << " l= " << suffix_len;
@@ -1013,5 +1040,3 @@ void CassieIndexer::filltree(long pos) {
 	}
 
 }
-
-
