@@ -183,7 +183,7 @@ int main (int argc, char *argv[])
   }
 
 
-  long max_pattern_size = std::max(max_index_depth, (long)(pattern.size()+max_indel));
+  long max_pattern_size = std::max(max_index_depth, (long)(pattern.size()+max_indel+1));
 
   CassieIndexer* indexer = new CassieIndexer(sequence);
   if(reduction) {

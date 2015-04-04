@@ -1,3 +1,5 @@
+1.0.3: 04/04/15 O. Sallou
+  - Bug fix on min pattern size to use when limiting index size.
 1.0.2: 22/03/15 O. Sallou
   - Add -l option to limit the size of the index. If not specified, index will
     be done based on pattern length and indels. On next index/search operations
