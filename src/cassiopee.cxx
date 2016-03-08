@@ -417,6 +417,8 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 				else if(sib->next_pos>=0){
 					//LOG(INFO) << "next " << sib->next_pos << ", " << sib->next_length;
 					long tree_reducted_pos = -1;
+					// Fix O.Sallou 08/04/16 search error with reduction
+					counter++;
 					bool matched =  this->searchAtreduction(suffix, sib, counter, tree_reducted_pos, nbSubst, nbIn, nbDel, nbN);
 					break;
 
