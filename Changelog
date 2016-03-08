@@ -1,3 +1,5 @@
+1.0.4: 08/04/16 O. Sallou
+  - bug fix in search with reduction
 1.0.3: 04/04/15 O. Sallou
   - Bug fix on min pattern size to use when limiting index size.
 1.0.2: 22/03/15 O. Sallou
