@@ -104,7 +104,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\gflags.2.0.1.0\build\native\gflags.targets" Condition="Exists('packages\gflags.2.0.1.0\build\native\gflags.targets')" />
+    <Import Project="packages\gflags.2.1.2.1\build\native\gflags.targets" Condition="Exists('packages\gflags.2.1.2.1\build\native\gflags.targets')" />
     <Import Project="packages\glog.0.3.3.0\build\native\glog.targets" Condition="Exists('packages\glog.0.3.3.0\build\native\glog.targets')" />
     <Import Project="packages\cppunit.1.12.1.4\build\native\cppunit.targets" Condition="Exists('packages\cppunit.1.12.1.4\build\native\cppunit.targets')" />
     <Import Project="packages\boost.1.59.0.0\build\native\boost.targets" Condition="Exists('packages\boost.1.59.0.0\build\native\boost.targets')" />
@@ -115,8 +115,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\gflags.2.0.1.0\build\native\gflags.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\gflags.2.0.1.0\build\native\gflags.props'))" />
-    <Error Condition="!Exists('packages\gflags.2.0.1.0\build\native\gflags.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\gflags.2.0.1.0\build\native\gflags.targets'))" />
     <Error Condition="!Exists('packages\glog.0.3.3.0\build\native\glog.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glog.0.3.3.0\build\native\glog.props'))" />
     <Error Condition="!Exists('packages\glog.0.3.3.0\build\native\glog.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glog.0.3.3.0\build\native\glog.targets'))" />
     <Error Condition="!Exists('packages\cppunit.1.12.1.4\build\native\cppunit.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\cppunit.1.12.1.4\build\native\cppunit.props'))" />
@@ -124,5 +122,7 @@
     <Error Condition="!Exists('packages\boost.1.59.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost.1.59.0.0\build\native\boost.targets'))" />
     <Error Condition="!Exists('packages\boost_serialization-vc120.1.59.0.0\build\native\boost_serialization-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_serialization-vc120.1.59.0.0\build\native\boost_serialization-vc120.targets'))" />
     <Error Condition="!Exists('packages\boost_iostreams-vc120.1.59.0.0\build\native\boost_iostreams-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\boost_iostreams-vc120.1.59.0.0\build\native\boost_iostreams-vc120.targets'))" />
+    <Error Condition="!Exists('packages\gflags.2.1.2.1\build\native\gflags.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\gflags.2.1.2.1\build\native\gflags.props'))" />
+    <Error Condition="!Exists('packages\gflags.2.1.2.1\build\native\gflags.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\gflags.2.1.2.1\build\native\gflags.targets'))" />
   </Target>
 </Project>

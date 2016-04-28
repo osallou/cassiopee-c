@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>cassiopee.sln</id>
+    <version>1.0.0</version>
+    <authors>Olivier Sallou</authors>
+    <owners>IRISA</owners>
+    <licenseUrl>https://raw.githubusercontent.com/osallou/cassiopee-c/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/osallou/cassiopee-c</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Scan an input genomic sequence (dna/rna/protein) and search for a subsequence with exact match or allowing substitutions (Hamming distance) and/or insertion/deletions.</description>
+    <releaseNotes>Package creation.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>bioinformatics dna protein search pattern suffix array</tags>
+    <dependencies>
+      <dependency id="boost" version="1.59.0.0" />
+      <dependency id="boost_iostreams-vc120" version="1.59.0.0" />
+      <dependency id="boost_serialization-vc120" version="1.59.0.0" />
+      <dependency id="cppunit" version="1.12.1.4" />
+      <dependency id="gflags" version="2.0.1.0" />
+      <dependency id="glog" version="0.3.3.0" />
+    </dependencies>
+  </metadata>
+</package>
