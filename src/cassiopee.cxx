@@ -1,7 +1,9 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
 #include <glog/logging.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -714,7 +716,7 @@ void CassieIndexer::load() {
 
 string CassieIndexer::getSuffix(long pos) {
 
-	char* suffix;
+	char* suffix = NULL;
 
     this->seqstream.seekg(pos);
     // Get the rest of the line and print it

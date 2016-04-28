@@ -1,8 +1,13 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
 #include <glog/logging.h>
+#ifndef _WIN32
 #include <unistd.h>
 #include <libgen.h>
+#else
+#define strdup _strdup
+#include "win/getopt.h"
+#endif
 #include <algorithm>
 
 #include "Cassiopee.h"
@@ -183,7 +188,11 @@ int main (int argc, char *argv[])
   }
 
 
-  long max_pattern_size = std::max(max_index_depth, (long)(pattern.size()+max_indel+1));
+  //long max_pattern_size = std::max(max_index_depth, (long)(pattern.size()+max_indel+1));
+  long max_pattern_size = (long)(pattern.size() + max_indel + 1);
+  if (max_index_depth > max_pattern_size) {
+	  max_pattern_size = max_index_depth;
+  }
 
   CassieIndexer* indexer = new CassieIndexer(sequence);
   if(reduction) {

@@ -1,12 +1,28 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
+#ifndef _WIN32
 #include <unistd.h>
+#include <libgen.h>
+#else
+#define strdup _strdup
+#include "win/getopt.h"
+#endif
 #include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <string.h>
 
+#ifndef _WIN32
 #include "CassiopeeConfig.h"
+#else
+#define Cassiopee_VERSION_MAJOR 1
+#define Cassiopee_VERSION_MINOR 0
+#define use_openmp 0
+#define SUFFIX_CHUNK_SIZE 10
+
+#endif
+
+
 #include "Cassiopee.h"
 
 

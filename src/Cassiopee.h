@@ -4,7 +4,15 @@
 
 #include "tree/tree.hh"
 
+#ifndef _WIN32
 #include "CassiopeeConfig.h"
+#else
+#define Cassiopee_VERSION_MAJOR 1
+#define Cassiopee_VERSION_MINOR 0
+#define use_openmp 0
+#define SUFFIX_CHUNK_SIZE 10
+
+#endif
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
