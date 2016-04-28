@@ -1,3 +1,10 @@
+# Visual Studio
+*.sdf
+packages
+Debug
+Release
+ipch
+
 # Compiled Object files
 *.slo
 *.lo
