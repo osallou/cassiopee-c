@@ -1,12 +1,16 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
-#include <glog/logging.h>
+
 #ifndef _WIN32
 #include <unistd.h>
 #include <libgen.h>
+#include <glog/logging.h>
 #else
 #define strdup _strdup
 #include "win/getopt.h"
+#include <boost/log/trivial.hpp>
+#define INFO info
+#define DLOG BOOST_LOG_TRIVIAL
 #endif
 #include <algorithm>
 
@@ -169,8 +173,9 @@ int main (int argc, char *argv[])
   }
 
   //FLAGS_logtostderr = 1;
-
+#ifndef _WIN32
   google::InitGoogleLogging(sequence);
+#endif
   //google::SetLogDestination(google::GLOG_INFO,string(dirname(sequence)).c_str() );
 
   if(pattern_file!=NULL) {

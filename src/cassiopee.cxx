@@ -1,8 +1,15 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
-#include <glog/logging.h>
 #ifndef _WIN32
+#include <glog/logging.h>
 #include <unistd.h>
+#else
+#include <boost/log/trivial.hpp>
+#define INFO info
+#define FATAL fatal
+#define LOG BOOST_LOG_TRIVIAL
+#define DLOG BOOST_LOG_TRIVIAL
+
 #endif
 #include <algorithm>
 #include <iostream>
