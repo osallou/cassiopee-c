@@ -1,9 +1,14 @@
 // A simple program that computes the square root of a number
 #include <stdio.h>
 #include <glog/logging.h>
+#ifdef _WIN32
+#include "win/getopt.h"
+#else
 #include <unistd.h>
+#endif
 #include <libgen.h>
 #include <algorithm>
+
 
 #include "Cassiopee.h"
 
@@ -75,6 +80,7 @@ int main (int argc, char *argv[])
   string out_file_name;
 
   bool save = false;
+
 
   while ((c = getopt (argc, argv, "ud:ge:i:m:arhvs:p:n:t:o:f:x:y:l:")) != -1)
       switch (c)
