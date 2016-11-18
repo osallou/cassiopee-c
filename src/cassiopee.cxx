@@ -869,15 +869,10 @@ void CassieIndexer::filltree(long pos) {
 						tmp_node->next_length = sib->next_length - tree_reducted_pos - 1;
 						tmp_node->next_pos = sib->next_pos  + 1;
 						if(sib->next_pos>=0){
-							// TODO OSALLOU find which position we are within reduction
-
 							std::list<long> positions = sib->positions;
 							for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
 								tmp_node->positions.push_back(*it);
 							}
-
-							//tmp_node->positions.push_back(sib->next_length - tree_reducted_pos + 2);
-
 						}
 						sib->next_length = 0 ;
 						sib->next_pos = -1;
