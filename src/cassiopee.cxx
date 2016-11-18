@@ -262,9 +262,8 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 		}
 		else {
 			//LOG(INFO) << "full match but not complete, search childs";
-			// TODO complete match but suffix not over, should look at childs now
+			// complete match but suffix not over, should look at childs now
 			this->searchAtNode(suffix, counter+1, sib, NULL, nbSubst, nbIn, nbDel, nbN);
-
 		}
 	}
 	return false;
@@ -574,8 +573,12 @@ long CassieIndexer::graphNode(tree<TreeNode>::iterator node, long parent, ofstre
 		//char* next_chars = new char[first->next_length];
 		//this->seqstream.seekg(first->next_pos, this->seqstream.beg);
 		//this->seqstream.read(next_chars, first->next_length);
+
+
 		myfile << "node" << parent << " -> " << "node" << child << ";\n";
-		myfile << "node" << child << " [label=\"" << first->c << "-" << first->next_length  << "\"];\n";
+
+		myfile << "node" << child << " [label=\"" << first->c << "-" << first->next_length  << "-" << first->next_pos << "\"];\n";
+
 		if(first.number_of_children()>0 && (maxdepth==0 || tr.depth(first) < maxdepth)) {
 		  child = this->graphNode(first, child, myfile, maxdepth);
 		}
@@ -858,6 +861,29 @@ void CassieIndexer::filltree(long pos) {
 			else if(sib->next_pos>=0 && tree_reducted_pos < sib->next_length) {
 				while(tree_reducted_pos < sib->next_length && suffix_char == tree_char) {
 
+					// Fix #1 folding issue - OSALLOU
+					// Unfold reducted node while we have matches in reduction
+					if(tree_reducted_pos > -1 && counter < suffix_len - 1){
+						tree_char = tolower(tree_char);
+						TreeNode * tmp_node = new TreeNode(tree_char);
+						tmp_node->next_length = sib->next_length - tree_reducted_pos - 1;
+						tmp_node->next_pos = sib->next_pos  + 1;
+						if(sib->next_pos>=0){
+							// TODO OSALLOU find which position we are within reduction
+
+							std::list<long> positions = sib->positions;
+							for (std::list<long>::iterator it = positions.begin(); it != positions.end(); it++) {
+								tmp_node->positions.push_back(*it);
+							}
+
+							//tmp_node->positions.push_back(sib->next_length - tree_reducted_pos + 2);
+
+						}
+						sib->next_length = 0 ;
+						sib->next_pos = -1;
+						sib = this->tr.append_child(sib, *tmp_node);
+						tree_reducted_pos--;
+					}
 					if(counter == suffix_len - 1) {
 						// Match before parsing all chars
 						// Insert a node here

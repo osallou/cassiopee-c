@@ -1,3 +1,7 @@
+test/*.idx
+test/*.meta
+test/test.out
+
 # Compiled Object files
 *.slo
 *.lo

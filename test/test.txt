@@ -1,0 +1,3 @@
+bin/cassiopee -p ggtt -s test2.fasta.cass -o test.out  -r  -g
+dot -Tpng cassiopee.dot > cassiopee2.png
+
