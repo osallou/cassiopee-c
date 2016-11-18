@@ -115,13 +115,13 @@ void CassiopeeTest::testIndexWithReduction()
 	  char* seq = sequence;
 	  CassieIndexer* indexer = new CassieIndexer(seq);
 	  indexer->do_reduction = true;
+      indexer->max_index_depth = 4;
 	  indexer->index();
 
 	  CassieSearch* searcher = new CassieSearch(indexer);
 	  searcher->search("ggc");
 	  searcher->sort();
 	  list<Match*> matches = searcher->matches;
-
 	  if(matches.size()!=3) {
 		  CPPUNIT_FAIL( "wrong number of match" );
 	  }
@@ -193,6 +193,7 @@ void CassiopeeTest::testSearchWithError()
 	  char* seq = sequence;
 	  CassieIndexer* indexer = new CassieIndexer(seq);
 	  indexer->do_reduction = true;
+      indexer->max_index_depth = 4;
 	  indexer->index();
 
 	  CassieSearch* searcher = new CassieSearch(indexer);
@@ -202,12 +203,13 @@ void CassiopeeTest::testSearchWithError()
 	  list<Match*> matches = searcher->matches;
 
 
-
 	  std::list<Match*>::iterator it = matches.begin();
+      // œœœœœœœœœœcout << "#### " << (*it)->pos << "\n";
 	  if((*it)->pos != 15) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
 	  std::advance(it, 1);
+      // cout << "#### " << (*it)->pos << "\n";
 	  if((*it)->pos != 16) {
 		  CPPUNIT_FAIL( "wrong position" );
 	  }
@@ -360,7 +362,7 @@ int main(int argc, char* argv[])
   // Print test in a compiler compatible format.
   CppUnit::CompilerOutputter outputter( &result, CPPUNIT_NS::stdCOut() );
   outputter.write();
- 
+
   // Uncomment this for XML output
   std::ofstream file( "cppunit-report.xml" );
   CppUnit::XmlOutputter xml( &result, file );
