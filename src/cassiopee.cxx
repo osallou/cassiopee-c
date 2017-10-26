@@ -215,12 +215,11 @@ void CassieSearch::search(string suffix, bool clear) {
 
 bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::iterator sib, long counter, long tree_reducted_pos, int nbSubst, int nbIn, int nbDel, int nbN) {
 
-	//LOG(INFO) << "SEARCH AT REDUCTION";
 	char tree_char;
 	char suffix_char;
 	bool isequal = true;
 	while(counter < suffix.length() -1 && tree_reducted_pos < sib->next_length - 1 && isequal && sib->next_pos+tree_reducted_pos <  this->indexer->seq_length - 1 ) {
-
+		// LOG(ERROR) << "loop in reduction";
 		counter++;
 		suffix_char = suffix[counter];
 		tree_reducted_pos++;
@@ -233,9 +232,8 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 		}
 
 		tree_char = this->indexer->getCharAtSuffix(sib->next_pos+tree_reducted_pos);
-		//LOG(INFO) << "match " << suffix_char << " with " << tree_char << " at " << tree_reducted_pos << ", max=" << sib->next_length;
-
-		bool isequal = this->isequal(tree_char,suffix_char);
+		// LOG(ERROR) << "match " << suffix_char << " with " << tree_char << " at " << tree_reducted_pos << ", max=" << sib->next_length;
+		isequal = this->isequal(tree_char,suffix_char);
 		if(!isequal) {
 			// If DNA/RNA and tree matches a N, check on max consecutive N allowed
 			if(this->mode!=2 && tree_char == 'n') {
@@ -248,20 +246,29 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 				nbN = 0;
 			}
 		}
-
-		if(!isequal && this->max_subst>0 && nbSubst < this->max_subst) {
-			// Check for substitutions
-			isequal = true;
-			nbSubst++;
+		// LOG(ERROR) << "not equal, can substitute? " << isequal << ", " << nbSubst << ", " << this->max_subst;
+		if(!isequal) {
+			if(this->max_subst>0 && nbSubst < this->max_subst) {
+				// Check for substitutions
+				isequal = true;
+				nbSubst++;
+			}
+			else {
+				// LOG(ERROR) << "now break equal=" << isequal;
+				break;
+			}
 		}
+		
 	}
+
 	if(isequal) {
+		// LOG(ERROR) << "IS EQUAL? " << isequal;
 		if(counter == suffix.length() -1) {
 		this->getMatchesFromNode(sib, nbSubst, nbIn, nbDel);
 		return true;
 		}
 		else {
-			//LOG(INFO) << "full match but not complete, search childs";
+			//LOG(ERROR) << "full match but not complete, search childs";
 			// complete match but suffix not over, should look at childs now
 			this->searchAtNode(suffix, counter+1, sib, NULL, nbSubst, nbIn, nbDel, nbN);
 		}
@@ -414,10 +421,12 @@ void CassieSearch::searchAtNode(string suffix, const long suffix_pos, const tree
 
 				}
 				else if(sib->next_pos>=0){
+					//LOG(ERROR) << "-- " << sib->next_pos << ", " << sib->next_length;
 					//LOG(INFO) << "next " << sib->next_pos << ", " << sib->next_length;
 					long tree_reducted_pos = -1;
 					// Fix O.Sallou 08/04/16 search error with reduction
-					counter++;
+					// Fix O.Sallou 26/10/17 search error with reduction
+					//counter++;
 					bool matched =  this->searchAtreduction(suffix, sib, counter, tree_reducted_pos, nbSubst, nbIn, nbDel, nbN);
 					break;
 
