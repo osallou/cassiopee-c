@@ -258,7 +258,7 @@ bool CassieSearch::searchAtreduction(const string suffix, const tree<TreeNode>::
 				break;
 			}
 		}
-		
+
 	}
 
 	if(isequal) {
@@ -503,7 +503,7 @@ CassieIndexer::CassieIndexer(const char* path): loaded_from_file(false),max_dept
 
 char CassieIndexer::getCharAtSuffix(long pos) {
 	assert(pos < this->seq_length && pos>=0);
-    //LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " <= " << this->suffix_position + this->MAX_SUFFIX;
+    LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " <= " << this->suffix_position + this->MAX_SUFFIX;
 	if(this->suffix_position >= 0 && pos >= this->suffix_position && pos< this->suffix_position + this->MAX_SUFFIX ) {
 		//LOG(INFO) << pos - this->suffix_position << ": " << this->suffix[pos - this->suffix_position];
 		return tolower(this->suffix[pos - this->suffix_position]);
@@ -524,7 +524,7 @@ char* CassieIndexer::loadSuffix(long pos)  {
 
 	assert(pos < this->seq_length);
 
-	long suffix_len = min(this->MAX_SUFFIX,this->seq_length - pos - 1);
+	long suffix_len = min(this->MAX_SUFFIX,this->seq_length - pos);
 
 	//char* suffix = new char[suffix_len+1]();
 	delete[] this->suffix;
@@ -537,7 +537,7 @@ char* CassieIndexer::loadSuffix(long pos)  {
 
 	*this->suffix = tolower(*this->suffix);
 
-    //LOG(INFO) << "Load suffix chunk "<< suffix;
+    LOG(INFO) << "Load suffix chunk "<< suffix;
 	//this->suffix = suffix;
 
 
@@ -630,7 +630,7 @@ void CassieIndexer::index() {
 	DLOG(INFO) << "Indexing " << this->filename ;
 
 
-	for (long i=0; i<this->seq_length-1; i++) {
+	for (long i=0; i<this->seq_length; i++) {
 		this->filltree(i);
 	}
 
@@ -742,7 +742,7 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 	char node_char = this->getCharAtSuffix(pos+suffix_pos);
 	//long suffix_len = this->seq_length - (pos+suffix_pos) -1;
     // OSALLOU
-    long suffix_len = min(this->max_index_depth, this->seq_length - (pos+suffix_pos) -1);
+    long suffix_len = min(this->max_index_depth, this->seq_length - (pos+suffix_pos));
 
 	TreeNode* node = new TreeNode(node_char);
 
@@ -775,7 +775,7 @@ void CassieIndexer::fillTreeWithSuffix(long suffix_pos, long pos) {
 void CassieIndexer::fillTreeWithSuffix(tree<TreeNode>::iterator sib, long suffix_pos, long pos) {
 	//long suffix_len = this->seq_length - pos -1 ;
     //OSALLOU
-    long suffix_len = min(this->max_index_depth, this->seq_length - pos -1);
+    long suffix_len = min(this->max_index_depth, this->seq_length - pos);
 
 	for(long i=suffix_pos;i<suffix_len;i++) {
 		//char node_char = suffix[i];
@@ -824,10 +824,10 @@ void CassieIndexer::filltree(long pos) {
 
 	//long suffix_len = this->seq_length - pos - 1;
     // OSALLOU
-    long suffix_len = min(this->max_index_depth, this->seq_length - pos - 1);
+    long suffix_len = min(this->max_index_depth, this->seq_length - pos);
 
 
-	//LOG(INFO) << "new suffix " << pos << " l= " << suffix_len;
+	LOG(INFO) << "new suffix " << pos << " l= " << suffix_len;
 
 
 	sib = this->tr.begin();
