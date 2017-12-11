@@ -503,7 +503,7 @@ CassieIndexer::CassieIndexer(const char* path): loaded_from_file(false),max_dept
 
 char CassieIndexer::getCharAtSuffix(long pos) {
 	assert(pos < this->seq_length && pos>=0);
-    LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " <= " << this->suffix_position + this->MAX_SUFFIX;
+    //LOG(INFO) << "getchar " << this->suffix_position << " < " << pos << " <= " << this->suffix_position + this->MAX_SUFFIX;
 	if(this->suffix_position >= 0 && pos >= this->suffix_position && pos< this->suffix_position + this->MAX_SUFFIX ) {
 		//LOG(INFO) << pos - this->suffix_position << ": " << this->suffix[pos - this->suffix_position];
 		return tolower(this->suffix[pos - this->suffix_position]);
@@ -537,7 +537,7 @@ char* CassieIndexer::loadSuffix(long pos)  {
 
 	*this->suffix = tolower(*this->suffix);
 
-    LOG(INFO) << "Load suffix chunk "<< suffix;
+    //LOG(INFO) << "Load suffix chunk "<< suffix;
 	//this->suffix = suffix;
 
 
@@ -827,7 +827,7 @@ void CassieIndexer::filltree(long pos) {
     long suffix_len = min(this->max_index_depth, this->seq_length - pos);
 
 
-	LOG(INFO) << "new suffix " << pos << " l= " << suffix_len;
+	//LOG(INFO) << "new suffix " << pos << " l= " << suffix_len;
 
 
 	sib = this->tr.begin();
