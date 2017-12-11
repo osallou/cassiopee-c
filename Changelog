@@ -1,3 +1,5 @@
+1.0.6: 11/12/17 O. Sallou
+   - bug fix, last character was not indexed
 1.0.5: 18/11/16 O. Sallou
    - bug fix in search with reduction
 1.0.4: 08/04/16 O. Sallou
