@@ -12,7 +12,7 @@ target_link_libraries(cassiopeeknife cassie glog ${Boost_LIBRARIES} )
 # add the install targets
 install (TARGETS cassiopee DESTINATION bin)
 install (TARGETS cassiopeeknife DESTINATION bin)
-install (FILES "${PROJECT_BINARY_DIR}/CassiopeeConfig.h"        
+install (FILES "${PROJECT_BINARY_DIR}/CassiopeeConfig.h"
          DESTINATION include)
 install (TARGETS cassie DESTINATION lib)
 
@@ -27,4 +27,3 @@ ENDFOREACH(HEADER)
 ENDMACRO(INSTALL_HEADERS_WITH_DIRECTORY)
 
 INSTALL_HEADERS_WITH_DIRECTORY(HS)
-

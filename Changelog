@@ -1,3 +1,6 @@
+1.0.9: 16/08/18 O. Sallou
+   - Add new public method to CassieSearch vector<Match*> GetMatchList()
+   - Add morphism support (option -b) closes #2
 1.0.8: 12/04/18 O. Sallou
    - bug fix when searching with errors, some branches in tree were not analysed
 1.0.7: 11/12/17 O. Sallou

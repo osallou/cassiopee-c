@@ -186,6 +186,27 @@ void CassiopeeTest::testProtein()
 	  delete indexer;
 }
 
+void CassiopeeTest::testSearchWithMorphism()
+{
+    char sequence[] = "test/sequence.txt";
+    char* seq = sequence;
+    CassieIndexer* indexer = new CassieIndexer(seq);
+    indexer->do_reduction = true;
+    indexer->max_index_depth = 5;
+    indexer->index();
+
+    CassieSearch* searcher = new CassieSearch(indexer);
+    searcher->morphisms["g"] = "a";
+    searcher->search("tgtg");
+    searcher->sort();
+    list<Match*> matches = searcher->matches;
+
+
+    std::list<Match*>::iterator it = matches.begin();
+    if((*it)->pos != 71) {
+        CPPUNIT_FAIL( "wrong position" );
+    }
+}
 
 void CassiopeeTest::testSearchWithError()
 {

@@ -16,6 +16,7 @@ class CassiopeeTest : public CppUnit::TestFixture
   CPPUNIT_TEST( testProtein );
   CPPUNIT_TEST( testLoadSave );
   CPPUNIT_TEST( testMultiIndex );
+  CPPUNIT_TEST( testSearchWithMorphism );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -27,6 +28,7 @@ public:
   void testSearchInReduction();
   void testAmbiguity();
   void testSearchWithError();
+  void testSearchWithMorphism();
   void testSearchAfterN();
   void testSearchWithN();
   void testReducedSearchAfterN();

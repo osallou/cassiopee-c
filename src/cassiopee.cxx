@@ -138,6 +138,20 @@ bool CassieSearch::isequal(char a, char b) {
 		return Ambiguous::isequal(a,b);
 	}
 	else {
+		if(this->morphisms.size() != 0){
+			string s; s.push_back(b);
+			map<string,string>::iterator it=this->morphisms.find(string(s));
+			if ( it != this->morphisms.end() ) {
+				//Try morphisms
+				char*  morphValues = strdup(it->second.c_str());
+				for(char* it = morphValues; *it; ++it) {
+					if(*it == a) {
+						return true;
+					}
+				}
+			}
+
+		}
 		return a==b;
 	}
 }

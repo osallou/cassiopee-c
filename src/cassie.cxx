@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <algorithm>
+#include <map>
 
 #include "Cassiopee.h"
 
@@ -28,6 +29,7 @@ void showUsage() {
      fprintf(stdout,"\t-t: output format: 0:tsv (default), 1:json\n");
      fprintf(stdout,"\t-x: minimum position in sequence\n");
      fprintf(stdout,"\t-y: maximum position in sequence\n");
+	 fprintf(stdout,"\t-b: apply morphisms to pattern\n");
 	 fprintf(stdout,"\t-v: show version\n");
 	 fprintf(stdout,"\t-h: show this message\n");
 }
@@ -67,6 +69,10 @@ int main (int argc, char *argv[])
 
   long max_index_depth = 0;
 
+  bool hasMorphisms = false;
+  string morphisms;
+  map<std::string, string> mapOfMorph;
+
   bool graph = false;
   long max_graph = 0;
 
@@ -76,9 +82,12 @@ int main (int argc, char *argv[])
 
   bool save = false;
 
-  while ((c = getopt (argc, argv, "ud:ge:i:m:arhvs:p:n:t:o:f:x:y:l:")) != -1)
+  while ((c = getopt (argc, argv, "ud:ge:i:m:arhvs:p:b:n:t:o:f:x:y:l:")) != -1)
       switch (c)
       {
+		 case 'b':
+		 	morphisms = string(optarg);
+			hasMorphisms = true;
          case 'l':
              max_index_depth = atol(optarg);
       	 case 'u':
@@ -168,6 +177,34 @@ int main (int argc, char *argv[])
   google::InitGoogleLogging(sequence);
   //google::SetLogDestination(google::GLOG_INFO,string(dirname(sequence)).c_str() );
 
+  if(hasMorphisms){
+	  DLOG(INFO) << "input morph " << morphisms;
+	  //a,g,c,ta ==>  a=>g,c=>ta
+	  char* buf = strdup(morphisms.c_str());
+	  char *pch;
+	  char *key;
+	  char *value;
+	  pch = strtok (buf, ",");
+	  key = pch;
+	  pch = strtok (NULL, ",");
+	  value = pch;
+	  mapOfMorph[string(key)] = string(value);
+	  //DLOG(INFO) << "insert " << key << ":" << value;
+
+	  while (pch != NULL)
+	  {
+	    pch = strtok (NULL, ",");
+		if(pch == NULL) {
+			break;
+		}
+		key = pch;
+		pch = strtok (NULL, ",");
+		value = pch;
+		mapOfMorph[string(key)] = string(value);
+		//DLOG(INFO) << "insert " << key << ":" << value;
+	}
+  }
+
   if(pattern_file!=NULL) {
     ifstream pfile(pattern_file);
     if(pfile.is_open()) {
@@ -203,6 +240,9 @@ int main (int argc, char *argv[])
   DLOG(INFO) << "Tree size: " <<indexer->getTree()->size();
 
   CassieSearch* searcher = new CassieSearch(indexer);
+  if(hasMorphisms){
+  	searcher->morphisms = mapOfMorph;
+  }
   searcher->mode = mode;
   // Allow 1 substitution for test
   searcher->max_subst = max_subst;
