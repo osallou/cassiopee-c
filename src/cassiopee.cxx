@@ -135,10 +135,11 @@ bool CassieSearch::isequal(char a, char b) {
 		return true;
 	}
 	if(this->ambiguity && this->mode!=2) {
-		return Ambiguous::isequal(a,b);
+		if(Ambiguous::isequal(a,b)) {
+			return true;
+		}
 	}
-	else {
-		if(this->morphisms.size() != 0){
+	if(this->morphisms.size() != 0){
 			string s; s.push_back(b);
 			map<string,string>::iterator it=this->morphisms.find(string(s));
 			if ( it != this->morphisms.end() ) {
@@ -150,10 +151,8 @@ bool CassieSearch::isequal(char a, char b) {
 					}
 				}
 			}
-
-		}
-		return a==b;
 	}
+	return false;
 }
 
 void CassieSearch::getMatchesFromNode(tree<TreeNode>::iterator sib, const int nbSubsts, const int nbIn, const int nbDel) {
