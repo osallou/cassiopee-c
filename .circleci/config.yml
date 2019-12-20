@@ -18,4 +18,4 @@ jobs:
           command: choco install cmake boost-msvc-14.1
       - run:
           name: "Compile"
-          command: cmake . ; make
+          command: ls C:\Program Files\CMake\ ; C:\Program Files\CMake\cmake . ; make
