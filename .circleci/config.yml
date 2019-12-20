@@ -1,0 +1,21 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@1.0.0
+
+jobs:
+  build:
+    executor:
+      name: win/vs2019
+      shell: powershell.exe
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dotnet-packages-v1-{{ checksum "circleci-demo-windows.csproj" }}
+      - run:
+          name: "Install project dependencies, google-log missing for the moment"
+          command: choco install cmake boost-msvc-14.1
+      - run
+          name: "Compile"
+          command: cmake . ; make
