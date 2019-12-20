@@ -15,7 +15,7 @@ jobs:
             - dotnet-packages-v1-{{ checksum "circleci-demo-windows.csproj" }}
       - run:
           name: "Install project dependencies, google-log missing for the moment"
-          command: choco install cmake boost-msvc-14.1 make doxygen MinGW
+          command: choco install cmake boost-msvc-14.1 make doxygen.install MinGW
       - run:
           name: "Compile"
           command: $ENV:PATH="$ENV:PATH;C:\Program Files (x86)\Microsoft Visual Studio\VC\bin\x86_amd64"; $ENV:BOOST_ROOT="C:\local\boost_1_67_0"; & "C:\Program Files\Cmake\bin\cmake.exe" -Wno-dev -G "Unix Makefiles" -DCGAL_Boost_USE_STATIC_LIBS=true .; make
